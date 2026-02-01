@@ -5,14 +5,36 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:nix-darwin/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ self, nixpkgs, nix-darwin, ... }: {
-    darwinConfigurations."air" = nix-darwin.lib.darwinSystem {
-      system = "aarch64-darwin";
-      modules = [
-        ./hosts/air/default.nix
-      ];
+  outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, ... }:
+    let
+      mkDarwin = { hostname, username, system ? "aarch64-darwin" }:
+        nix-darwin.lib.darwinSystem {
+          inherit system;
+          specialArgs = { inherit username; };
+          modules = [
+            ./hosts/${hostname}/default.nix
+            home-manager.darwinModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.extraSpecialArgs = { inherit username; };
+              home-manager.users.${username} = {
+                imports = [ ./home/default.nix ];
+                home.username = username;
+                home.homeDirectory = "/Users/${username}";
+              };
+            }
+          ];
+        };
+    in
+    {
+      darwinConfigurations."air" = mkDarwin {
+        hostname = "air";
+        username = "yutaura";
+      };
     };
-  };
 }
