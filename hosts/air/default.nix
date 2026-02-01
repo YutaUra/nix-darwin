@@ -5,6 +5,10 @@
   nix.enable = false;
 
   nixpkgs.hostPlatform = "aarch64-darwin";
+  nixpkgs.config.allowUnfreePredicate = pkg:
+    builtins.elem (pkgs.lib.getName pkg) [
+      "1password-cli"
+    ];
 
   # 最小限のパッケージで動作確認
   environment.systemPackages = [

@@ -1,8 +1,27 @@
 { pkgs, ... }: {
   home.stateVersion = "24.11";
 
-  # 動作確認用に1つだけ
-  home.packages = [
-    pkgs.ripgrep
+  home.packages = with pkgs; [
+    # CLI ツール
+    ripgrep
+    awscli2
+    ffmpeg
+    ncdu
+
+    # 開発ツール
+    gh
+
+    # Docker 関連
+    colima
+    docker-client
+    docker-buildx
+    docker-compose
+    lima
+
+    # ランタイム
+    nodejs_22
+
+    # その他
+    _1password-cli
   ];
 }
