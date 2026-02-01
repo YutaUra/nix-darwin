@@ -1,4 +1,9 @@
 { pkgs, ... }: {
+  imports = [
+    ./shell.nix
+    ./starship.nix
+  ];
+
   home.stateVersion = "24.11";
 
   home.packages = with pkgs; [

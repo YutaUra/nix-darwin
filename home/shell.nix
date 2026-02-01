@@ -1,0 +1,28 @@
+{ ... }: {
+  programs.zsh = {
+    enable = true;
+    autosuggestion.enable = true;
+
+    initExtra = ''
+      # colima 自動起動
+      if ! colima list --json 2>/dev/null | jq -e 'select(.name=="default" and .status=="Running")' >/dev/null; then
+        colima start
+      fi
+
+      # 1Password CLI で秘密情報を取得
+      export GITHUB_PERSONAL_ACCESS_TOKEN=$(op read "op://Private/GitHub Personal Access Token/token" 2>/dev/null || echo "")
+
+      # キーバインド: 上下矢印で履歴の前方一致検索
+      autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+      zle -N up-line-or-beginning-search
+      zle -N down-line-or-beginning-search
+      bindkey -r '^[[A' '^[[B' '^[OA' '^[OB' 2>/dev/null
+      for km in emacs viins vicmd; do
+        bindkey -M $km '^[[A' up-line-or-beginning-search
+        bindkey -M $km '^[[B' down-line-or-beginning-search
+        bindkey -M $km '^[OA' up-line-or-beginning-search
+        bindkey -M $km '^[OB' down-line-or-beginning-search
+      done
+    '';
+  };
+}
