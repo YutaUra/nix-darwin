@@ -4,6 +4,7 @@
     ./starship.nix
     ./git.nix
     ./ghostty.nix
+    ./claude-code.nix
   ];
 
   home.stateVersion = "24.11";
