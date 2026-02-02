@@ -15,6 +15,7 @@
     ncdu
 
     # 開発ツール
+    claude-code
     gh
 
     # Docker 関連

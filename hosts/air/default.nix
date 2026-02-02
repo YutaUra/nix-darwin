@@ -1,4 +1,8 @@
 { pkgs, username, ... }: {
+  imports = [
+    ./homebrew.nix
+  ];
+
   # ユーザー
   users.users.${username}.home = "/Users/${username}";
   # Nix 管理は Determinate Nix に委譲
@@ -11,6 +15,7 @@
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (pkgs.lib.getName pkg) [
       "1password-cli"
+      "claude-code"
     ];
 
   environment.systemPackages = [
