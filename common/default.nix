@@ -1,6 +1,7 @@
 { pkgs, username, ... }: {
   imports = [
     ./homebrew.nix
+    ./auto-update.nix
   ];
 
   # ユーザー

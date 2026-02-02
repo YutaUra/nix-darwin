@@ -13,9 +13,10 @@
   outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, nix-homebrew, ... }:
     let
       mkDarwin = { hostname, username, profile, system ? "aarch64-darwin" }:
+        let configName = profile; in
         nix-darwin.lib.darwinSystem {
           inherit system;
-          specialArgs = { inherit username; };
+          specialArgs = { inherit username configName; };
           modules = [
             ./hosts/${hostname}/default.nix
             nix-homebrew.darwinModules.nix-homebrew
