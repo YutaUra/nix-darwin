@@ -3,6 +3,7 @@
     ./shell.nix
     ./starship.nix
     ./git.nix
+    ./ghostty.nix
   ];
 
   home.stateVersion = "24.11";

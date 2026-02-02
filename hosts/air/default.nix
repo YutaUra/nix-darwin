@@ -40,6 +40,11 @@
     };
   };
 
+  # フォント
+  fonts.packages = [
+    pkgs.plemoljp-nf
+  ];
+
   # Touch ID で sudo 認証
   security.pam.services.sudo_local.touchIdAuth = true;
 

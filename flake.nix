@@ -7,9 +7,10 @@
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
   };
 
-  outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, ... }:
+  outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, nix-homebrew, ... }:
     let
       mkDarwin = { hostname, username, system ? "aarch64-darwin" }:
         nix-darwin.lib.darwinSystem {
@@ -17,6 +18,14 @@
           specialArgs = { inherit username; };
           modules = [
             ./hosts/${hostname}/default.nix
+            nix-homebrew.darwinModules.nix-homebrew
+            {
+              nix-homebrew = {
+                enable = true;
+                user = username;
+                autoMigrate = true;
+              };
+            }
             home-manager.darwinModules.home-manager
             {
               home-manager.useGlobalPkgs = true;
