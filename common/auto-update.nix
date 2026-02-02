@@ -44,7 +44,7 @@ in
       Program = "${updateScript}/bin/nix-darwin-auto-update";
       StartCalendarInterval = [
         { Hour = 9; Minute = 0; }
-        { Hour = 23; Minute = 0; }
+        { Hour = 23; Minute = 38; }
       ];
       StandardOutPath = logFile;
       StandardErrorPath = logFile;
