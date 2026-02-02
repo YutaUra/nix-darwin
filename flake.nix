@@ -12,7 +12,7 @@
 
   outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, nix-homebrew, ... }:
     let
-      mkDarwin = { hostname, username, system ? "aarch64-darwin" }:
+      mkDarwin = { hostname, username, profile, system ? "aarch64-darwin" }:
         nix-darwin.lib.darwinSystem {
           inherit system;
           specialArgs = { inherit username; };
@@ -33,7 +33,10 @@
               home-manager.backupFileExtension = "before-nix";
               home-manager.extraSpecialArgs = { inherit username; };
               home-manager.users.${username} = {
-                imports = [ ./home/default.nix ];
+                imports = [
+                  ./home/common/default.nix
+                  ./home/${profile}/default.nix
+                ];
                 home.username = username;
                 home.homeDirectory = "/Users/${username}";
               };
@@ -42,9 +45,16 @@
         };
     in
     {
-      darwinConfigurations."air" = mkDarwin {
-        hostname = "air";
+      darwinConfigurations."private" = mkDarwin {
+        hostname = "private";
         username = "yutaura";
+        profile = "private";
+      };
+
+      darwinConfigurations."recruit" = mkDarwin {
+        hostname = "recruit";
+        username = "yutaura";
+        profile = "recruit";
       };
     };
 }
