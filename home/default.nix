@@ -2,6 +2,7 @@
   imports = [
     ./shell.nix
     ./starship.nix
+    ./git.nix
   ];
 
   home.stateVersion = "24.11";
