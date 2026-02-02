@@ -9,9 +9,6 @@
         colima start
       fi
 
-      # 1Password CLI で秘密情報を取得
-      export GITHUB_PERSONAL_ACCESS_TOKEN=$(op read "op://Private/GitHub Personal Access Token/token" 2>/dev/null || echo "")
-
       # キーバインド: 上下矢印で履歴の前方一致検索
       autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
       zle -N up-line-or-beginning-search
