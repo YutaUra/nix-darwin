@@ -10,7 +10,7 @@ macOS の設定を [nix-darwin](https://github.com/nix-darwin/nix-darwin) で宣
 ## セットアップ
 
 ```sh
-git clone <repo-url> ~/.config/nix-darwin
+git clone git@github.com:YutaUra/nix-darwin.git ~/.config/nix-darwin
 cd ~/.config/nix-darwin
 sudo darwin-rebuild switch --flake .#private   # 個人マシンの場合
 sudo darwin-rebuild switch --flake .#recruit   # 仕事マシンの場合
