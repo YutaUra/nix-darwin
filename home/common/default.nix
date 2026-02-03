@@ -29,8 +29,16 @@
 
     # ランタイム
     nodejs_22
+    (corepack.overrideAttrs (old: { meta = old.meta // { priority = 0; }; }))
+
+    # IaC
+    opentofu
 
     # その他
     _1password-cli
   ];
+
+  programs.zsh.shellAliases = {
+    terraform = "tofu";
+  };
 }

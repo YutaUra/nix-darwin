@@ -20,6 +20,9 @@
         bindkey -M $km '^[OA' up-line-or-beginning-search
         bindkey -M $km '^[OB' down-line-or-beginning-search
       done
+
+      # ローカル設定（トークン等）
+      [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
     '';
   };
 }

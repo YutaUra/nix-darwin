@@ -54,7 +54,7 @@
 
       darwinConfigurations."recruit" = mkDarwin {
         hostname = "recruit";
-        username = "yutaura";
+        username = "01051961";
         profile = "recruit";
       };
     };

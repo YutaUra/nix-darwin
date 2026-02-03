@@ -10,6 +10,8 @@
       core.editor = "code --wait";
       core.ignorecase = false;
       push.autoSetupRemote = true;
+      advice.skippedCherryPicks = false;
+      fetch.prune = true;
     };
   };
 }

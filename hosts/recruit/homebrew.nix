@@ -1,3 +1,9 @@
 { ... }: {
-  # recruit 固有の Homebrew casks
+  homebrew.casks = [
+    "amazon-workspaces"
+    "android-studio"
+    "microsoft-auto-update"
+    "microsoft-office"
+    "slack-cli"
+  ];
 }

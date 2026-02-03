@@ -1,7 +1,12 @@
-{ ... }: {
+{ pkgs, ... }: {
   imports = [
     ./git.nix
   ];
 
-  # recruit 固有の home.packages
+  home.packages = with pkgs; [
+    # Kubernetes
+    kubectl
+    stern
+    kustomize
+  ];
 }

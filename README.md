@@ -12,16 +12,34 @@ macOS の設定を [nix-darwin](https://github.com/nix-darwin/nix-darwin) で宣
 ```sh
 git clone git@github.com:YutaUra/nix-darwin.git ~/.config/nix-darwin
 cd ~/.config/nix-darwin
-sudo darwin-rebuild switch --flake .#private   # 個人マシンの場合
-sudo darwin-rebuild switch --flake .#recruit   # 仕事マシンの場合
+```
+
+### 初回（nix-darwin 未インストールの場合）
+
+初回は `darwin-rebuild` コマンドがまだ存在しないため、`nix run` でブートストラップします。
+
+```sh
+sudo nix run nix-darwin -- switch --flake '.#private'   # 個人マシンの場合
+sudo nix run nix-darwin -- switch --flake '.#recruit'   # 仕事マシンの場合
+```
+
+> **Note:** 既存の `/etc/nix/nix.conf` や `/etc/shells` があると競合エラーになる場合があります。その場合はバックアップして削除するか、エラーメッセージの指示に従ってください。
+
+### 2回目以降
+
+nix-darwin インストール後は `darwin-rebuild` コマンドが使えます。
+
+```sh
+sudo darwin-rebuild switch --flake '.#private'   # 個人マシンの場合
+sudo darwin-rebuild switch --flake '.#recruit'   # 仕事マシンの場合
 ```
 
 ## プロファイル
 
 | プロファイル | 用途 | コマンド |
 |---|---|---|
-| `private` | 個人マシン | `sudo darwin-rebuild switch --flake .#private` |
-| `recruit` | 仕事マシン | `sudo darwin-rebuild switch --flake .#recruit` |
+| `private` | 個人マシン | `sudo darwin-rebuild switch --flake '.#private'` |
+| `recruit` | 仕事マシン | `sudo darwin-rebuild switch --flake '.#recruit'` |
 
 ## ディレクトリ構造
 
