@@ -2,6 +2,9 @@
 
 set -eu
 
+# LD_PRELOAD に設定された共有ライブラリ（jemalloc 等）が Nix 環境と競合するため解除
+unset LD_PRELOAD
+
 echo "install スクリプト起動"
 
 # curl がなければインストール
@@ -67,8 +70,7 @@ else
 fi
 
 # home-manager を適用
-# LD_PRELOAD に設定された共有ライブラリ（jemalloc 等）が Nix 環境と競合するため解除
 echo "home-manager を適用中..."
-env -u LD_PRELOAD nix run home-manager -- switch --flake "$HM_DIR#qall-k8s" -b backup
+nix run home-manager -- switch --flake "$HM_DIR#qall-k8s" -b backup
 
 echo "セットアップ完了"
