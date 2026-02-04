@@ -12,6 +12,10 @@
     ];
 
   home.stateVersion = "24.11";
+  home.sessionVariables = {
+    NIX_LD = "/lib/ld-linux-aarch64.so.1";
+    NIX_LD_LIBRARY_PATH = "/usr/lib/aarch64-linux-gnu";
+  };
 
   home.packages = with pkgs; [
     # CLI ツール
