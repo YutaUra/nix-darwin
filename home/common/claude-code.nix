@@ -21,6 +21,9 @@
       "example-skills@anthropic-agent-skills" = true;
       "document-skills@anthropic-agent-skills" = true;
     };
+    env = {
+      DISABLE_AUTOUPDATER = "1";
+    };
     language = "日本語";
   };
 }
