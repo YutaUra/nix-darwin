@@ -45,27 +45,41 @@ sudo darwin-rebuild switch --flake '.#recruit'   # 仕事マシンの場合
 
 K8s 開発コンテナでは `/quipper/dotfiles/install` スクリプトがコンテナ起動時に自動実行され、Nix と home-manager がセットアップされます。
 
+初回のみ、`scripts/install` を `/quipper/dotfiles/install` にコピーしてください：
+
+```sh
+mkdir -p /quipper/dotfiles
+cp scripts/install /quipper/dotfiles/install
+```
+
 スクリプトは以下を行います：
 1. curl のインストール（未インストールの場合）
-2. Determinate Nix のインストール（未インストールの場合）
-3. `~/.config/home-manager` への設定リポジトリの clone/pull
-4. home-manager の適用
+2. Determinate Nix のインストール（systemd なしのコンテナ環境向け `--init none` オプション付き）
+3. Nix daemon の起動
+4. `~/.config/home-manager` への設定リポジトリの clone/pull
+5. home-manager の適用
 
 #### 手動セットアップ
 
 自動セットアップを使わない場合：
 
 ```sh
-# 1. Nix のインストール
-curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
+# 1. Nix のインストール（systemd がないコンテナ環境向け）
+curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install linux --init none
 
-# 2. シェルを再起動するか source でパスを通す
+# 2. Nix daemon を起動（--init none の場合は自動起動しないため）
+sudo /nix/var/nix/profiles/default/bin/nix-daemon &
+
+# 3. daemon が応答するまで待機
+until nix store ping > /dev/null 2>&1; do sleep 1; done
+
+# 5. 環境変数を読み込む
 . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 
-# 3. 設定リポジトリを clone
+# 6. 設定リポジトリを clone
 git clone https://github.com/YutaUra/nix-darwin.git ~/.config/home-manager
 
-# 4. home-manager を適用
+# 7. home-manager を適用
 nix run home-manager -- switch --flake ~/.config/home-manager#qall-k8s -b backup
 ```
 
@@ -96,6 +110,8 @@ home-manager switch --flake .#qall-k8s
 
 ```
 flake.nix             # エントリポイント
+scripts/
+  install             # K8s コンテナ用セットアップスクリプト（/quipper/dotfiles/install にコピーして使用）
 common/               # 全プロファイル共通のシステム設定
   default.nix         #   macOS defaults, fonts, sudo 等
   homebrew.nix        #   共通 Homebrew casks
@@ -117,7 +133,7 @@ home/
     claude-code.nix   #   Claude Code 設定
   private/            # private 固有の home-manager 設定（拡張枠）
   recruit/            # recruit 固有の home-manager 設定（Git 追加設定等）
-  qall-k8s/           # K8s 開発コンテナ用（aarch64-linux、/quipper/dotfiles/install も管理）
+  qall-k8s/           # K8s 開発コンテナ用（aarch64-linux）
 ```
 
 ## 自動更新（現在無効）

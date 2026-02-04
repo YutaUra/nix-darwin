@@ -19,7 +19,7 @@ home/{profile}/  … プロファイル固有の home-manager 設定（private, 
 - `home/common/` はパッケージ、shell, git, starship, ghostty, claude-code の設定
   - `shell-base.nix` は macOS/Linux 共通のシェル設定、`shell.nix` は macOS 固有（colima 自動起動）
 - `home/{profile}/` はプロファイル固有パッケージや git 設定の拡張枠
-- `home/qall-k8s/` は `/quipper/dotfiles/install` スクリプトも管理（`home.file` + `home.activation` でシンボリックリンク作成）
+- `scripts/install` は K8s コンテナ用セットアップスクリプト（`/quipper/dotfiles/install` にコピーして使用）
 
 ## flake.nix の構造
 

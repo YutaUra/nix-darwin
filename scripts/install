@@ -1,0 +1,73 @@
+#!/usr/bin/env sh
+
+set -eu
+
+echo "install スクリプト起動"
+
+# curl がなければインストール
+if ! command -v curl > /dev/null 2>&1; then
+  echo "curl をインストール中..."
+  if command -v apt-get > /dev/null 2>&1; then
+    sudo apt-get update && sudo apt-get install -y curl
+  elif command -v apk > /dev/null 2>&1; then
+    sudo apk add curl
+  else
+    echo "パッケージマネージャーが見つかりません。curl をインストールできません。"
+    exit 1
+  fi
+fi
+
+# Nix がインストールされているか確認
+if [ ! -d /nix ]; then
+  echo "Nix をインストール中..."
+  # systemd がないコンテナ環境のため --init none を指定
+  curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install linux --init none --no-confirm
+fi
+
+# Nix daemon を起動（--init none でインストールした場合は自動起動しないため）
+if [ -d /nix ] && ! pgrep -x nix-daemon > /dev/null 2>&1; then
+  echo "Nix daemon を起動中..."
+  sudo /nix/var/nix/profiles/default/bin/nix-daemon &
+
+  # daemon が応答するまで待機（最大30秒）
+  echo "Nix daemon の起動を待機中..."
+  for i in $(seq 1 30); do
+    if /nix/var/nix/profiles/default/bin/nix store ping > /dev/null 2>&1; then
+      echo "Nix daemon が起動しました"
+      break
+    fi
+    if [ "$i" -eq 30 ]; then
+      echo "警告: Nix daemon の起動がタイムアウトしました"
+    fi
+    sleep 1
+  done
+fi
+
+# Nix の環境変数を読み込む
+if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+  . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+fi
+
+# 環境変数を設定（コンテナ環境で未設定の場合がある）
+export USER="${USER:-quipper}"
+export HOME="${HOME:-/home/quipper}"
+
+# Nix が使用するディレクトリを作成
+mkdir -p "$HOME/.cache/nix"
+mkdir -p "$HOME/.config/nix"
+
+# home-manager 設定リポジトリの準備
+HM_DIR="$HOME/.config/home-manager"
+if [ ! -d "$HM_DIR" ]; then
+  echo "home-manager 設定を clone 中..."
+  git clone https://github.com/YutaUra/nix-darwin.git "$HM_DIR"
+else
+  echo "home-manager 設定を更新中..."
+  git -C "$HM_DIR" pull
+fi
+
+# home-manager を適用
+echo "home-manager を適用中..."
+nix run home-manager -- switch --flake "$HM_DIR#qall-k8s" -b backup
+
+echo "セットアップ完了"
