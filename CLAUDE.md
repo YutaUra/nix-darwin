@@ -19,6 +19,7 @@ home/{profile}/  … プロファイル固有の home-manager 設定（private, 
 - `home/common/` はパッケージ、shell, git, starship, ghostty, claude-code の設定
   - `shell-base.nix` は macOS/Linux 共通のシェル設定、`shell.nix` は macOS 固有（colima 自動起動）
 - `home/{profile}/` はプロファイル固有パッケージや git 設定の拡張枠
+- `home/qall-k8s/` は `/quipper/dotfiles/install` スクリプトも管理（`home.file` + `home.activation` でシンボリックリンク作成）
 
 ## flake.nix の構造
 
@@ -29,7 +30,7 @@ home/{profile}/  … プロファイル固有の home-manager 設定（private, 
 - `recruit` — 仕事マシン（hosts/recruit）
 
 現在の homeConfigurations（Linux 用）:
-- `qall-k8s` — K8s 開発コンテナ（home/qall-k8s）
+- `qall-k8s` — K8s 開発コンテナ（home/qall-k8s、aarch64-linux）
 
 ## ビルド・適用コマンド
 
@@ -45,12 +46,13 @@ darwin-rebuild build --flake '.#private'   # build のみ（sudo 不要）
 
 ### Linux コンテナ（home-manager）
 
-```sh
-# コンテナ内で実行
-home-manager switch --flake '.#qall-k8s'
+K8s 開発コンテナでは `/quipper/dotfiles/install` が自動実行され、Nix + home-manager がセットアップされる。
 
-# リモートから直接（GitHub に push 済みの場合）
-nix run home-manager -- switch --flake 'github:YutaUra/nix-darwin#qall-k8s'
+手動で適用する場合：
+```sh
+cd ~/.config/home-manager
+git pull
+home-manager switch --flake .#qall-k8s
 ```
 
 ## 自動更新（現在無効）

@@ -39,32 +39,42 @@ sudo darwin-rebuild switch --flake '.#private'   # 個人マシンの場合
 sudo darwin-rebuild switch --flake '.#recruit'   # 仕事マシンの場合
 ```
 
-### Linux コンテナ
+### Linux コンテナ（qall-k8s）
 
-#### 1. Nix のインストール
+#### 自動セットアップ（推奨）
+
+K8s 開発コンテナでは `/quipper/dotfiles/install` スクリプトがコンテナ起動時に自動実行され、Nix と home-manager がセットアップされます。
+
+スクリプトは以下を行います：
+1. curl のインストール（未インストールの場合）
+2. Determinate Nix のインストール（未インストールの場合）
+3. `~/.config/home-manager` への設定リポジトリの clone/pull
+4. home-manager の適用
+
+#### 手動セットアップ
+
+自動セットアップを使わない場合：
 
 ```sh
+# 1. Nix のインストール
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
-```
 
-インストール後、シェルを再起動するか `source` でパスを通します：
-
-```sh
+# 2. シェルを再起動するか source でパスを通す
 . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-```
 
-#### 2. home-manager の適用
+# 3. 設定リポジトリを clone
+git clone https://github.com/YutaUra/nix-darwin.git ~/.config/home-manager
 
-```sh
-# GitHub から直接適用
-nix run home-manager -- switch --flake github:YutaUra/nix-darwin#qall-k8s
+# 4. home-manager を適用
+nix run home-manager -- switch --flake ~/.config/home-manager#qall-k8s -b backup
 ```
 
 #### 2回目以降
 
 ```sh
-# home-manager コマンドが使える
-home-manager switch --flake github:YutaUra/nix-darwin#qall-k8s
+cd ~/.config/home-manager
+git pull
+home-manager switch --flake .#qall-k8s
 ```
 
 ## プロファイル
@@ -78,9 +88,9 @@ home-manager switch --flake github:YutaUra/nix-darwin#qall-k8s
 
 ### Linux（homeConfigurations）
 
-| プロファイル | 用途 | コマンド |
-|---|---|---|
-| `qall-k8s` | K8s 開発コンテナ | `home-manager switch --flake '.#qall-k8s'` |
+| プロファイル | 用途 | アーキテクチャ | コマンド |
+|---|---|---|---|
+| `qall-k8s` | K8s 開発コンテナ | aarch64-linux | `home-manager switch --flake '.#qall-k8s'` |
 
 ## ディレクトリ構造
 
@@ -107,7 +117,7 @@ home/
     claude-code.nix   #   Claude Code 設定
   private/            # private 固有の home-manager 設定（拡張枠）
   recruit/            # recruit 固有の home-manager 設定（Git 追加設定等）
-  qall-k8s/           # K8s 開発コンテナ用の home-manager 設定
+  qall-k8s/           # K8s 開発コンテナ用（aarch64-linux、/quipper/dotfiles/install も管理）
 ```
 
 ## 自動更新（現在無効）
