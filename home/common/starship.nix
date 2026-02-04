@@ -2,6 +2,7 @@
   programs.starship = {
     enable = true;
     settings = {
+      command_timeout = 5000;
       add_newline = false;
       format = "$directory$git_branch$git_status$character";
 
