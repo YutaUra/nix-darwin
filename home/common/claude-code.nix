@@ -1,7 +1,7 @@
 { ... }: {
   home.file.".claude/CLAUDE.md".source = ./claude-md/CLAUDE.md;
-  home.file.".claude/documentation-principles.md".source = ./claude-md/documentation-principles.md;
-  home.file.".claude/tdd-guidelines.md".source = ./claude-md/tdd-guidelines.md;
+  home.file.".claude/rules/documentation-principles.md".source = ./claude-md/rules/documentation-principles.md;
+  home.file.".claude/rules/tdd-guidelines.md".source = ./claude-md/rules/tdd-guidelines.md;
 
   home.file.".claude/settings.json".text = builtins.toJSON {
     enabledPlugins = {

@@ -1,3 +1,7 @@
+---
+description: TDD（テスト駆動開発）の実践を強制する。Use when implementing features, fixing bugs, or writing tests.
+---
+
 # TDD（テスト駆動開発）ガイドライン
 
 ## 1. なぜテストを書くのか

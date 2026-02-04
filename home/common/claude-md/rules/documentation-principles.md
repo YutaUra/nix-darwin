@@ -1,3 +1,7 @@
+---
+description: コード/テスト/コミット/コメントの書き分け原則を強制する。Use when writing code, tests, commits, or code comments.
+---
+
 # コードドキュメンテーションの原則
 
 ## 概要
