@@ -71,6 +71,7 @@ fi
 
 # home-manager を適用
 echo "home-manager を適用中..."
+export LD_LIBRARY_PATH="/usr/lib/aarch64-linux-gnu:${LD_LIBRARY_PATH:-}"
 nix run home-manager -- switch --flake "$HM_DIR#qall-k8s" -b backup
 
 echo "セットアップ完了"
