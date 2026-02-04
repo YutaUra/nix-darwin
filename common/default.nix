@@ -1,7 +1,7 @@
 { pkgs, username, ... }: {
   imports = [
     ./homebrew.nix
-    ./auto-update.nix
+    # ./auto-update.nix  # 一旦無効化
   ];
 
   # ユーザー

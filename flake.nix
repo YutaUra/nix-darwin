@@ -57,5 +57,16 @@
         username = "01051961";
         profile = "recruit";
       };
+
+      homeConfigurations."qall-k8s" = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        modules = [
+          ./home/qall-k8s/default.nix
+          {
+            home.username = "quipper";
+            home.homeDirectory = "/home/quipper";
+          }
+        ];
+      };
     };
 }
