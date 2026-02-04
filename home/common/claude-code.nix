@@ -3,6 +3,10 @@
   home.file.".claude/rules/documentation-principles.md".source = ./claude-md/rules/documentation-principles.md;
   home.file.".claude/rules/tdd-guidelines.md".source = ./claude-md/rules/tdd-guidelines.md;
 
+  # Skills
+  home.file.".claude/skills/claude-code-rules/SKILL.md".source = ./claude-md/skills/claude-code-rules/SKILL.md;
+  home.file.".claude/skills/claude-code-rules/references/rule-format.md".source = ./claude-md/skills/claude-code-rules/references/rule-format.md;
+
   home.file.".claude/settings.json".text = builtins.toJSON {
     enabledPlugins = {
       "figma@claude-plugins-official" = true;
