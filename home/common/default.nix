@@ -15,6 +15,7 @@
     awscli2
     ffmpeg
     ncdu
+    watch
 
     # 開発ツール
     claude-code
