@@ -17,6 +17,11 @@
     NIX_LD_LIBRARY_PATH = "/usr/lib/aarch64-linux-gnu";
   };
 
+  # LD_PRELOAD に設定された共有ライブラリ（jemalloc 等）が Nix 環境と競合するため解除
+  programs.zsh.initContent = lib.mkBefore ''
+    unset LD_PRELOAD
+  '';
+
   home.packages = with pkgs; [
     # CLI ツール
     ripgrep
