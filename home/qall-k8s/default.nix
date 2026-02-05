@@ -35,16 +35,24 @@
     ruby
   ];
 
-  # Nix の libstdc++ をシステムの場所にシンボリックリンク
-  # これにより LD_PRELOAD の jemalloc が libstdc++ を見つけられる
-  home.activation.setupLibstdcpp = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  # Nix の C++ ランタイムライブラリをシステムの場所にシンボリックリンク
+  # これにより LD_PRELOAD の jemalloc が必要なライブラリを見つけられる
+  home.activation.setupCppRuntime = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     LIBDIR="/lib/aarch64-linux-gnu"
-    NIXLIB="${pkgs.stdenv.cc.cc.lib}/lib/libstdc++.so.6"
+    NIXLIBDIR="${pkgs.stdenv.cc.cc.lib}/lib"
 
     /usr/bin/sudo mkdir -p "$LIBDIR"
-    if [ ! -L "$LIBDIR/libstdc++.so.6" ] || [ "$(/usr/bin/readlink -f "$LIBDIR/libstdc++.so.6" 2>/dev/null)" != "$(/usr/bin/readlink -f "$NIXLIB" 2>/dev/null)" ]; then
-      echo "Creating symlink: $LIBDIR/libstdc++.so.6 -> $NIXLIB"
-      /usr/bin/sudo ln -sf "$NIXLIB" "$LIBDIR/libstdc++.so.6"
+
+    # libstdc++.so.6
+    if [ ! -L "$LIBDIR/libstdc++.so.6" ]; then
+      echo "Creating symlink: $LIBDIR/libstdc++.so.6"
+      /usr/bin/sudo ln -sf "$NIXLIBDIR/libstdc++.so.6" "$LIBDIR/libstdc++.so.6"
+    fi
+
+    # libgcc_s.so.1
+    if [ ! -L "$LIBDIR/libgcc_s.so.1" ]; then
+      echo "Creating symlink: $LIBDIR/libgcc_s.so.1"
+      /usr/bin/sudo ln -sf "$NIXLIBDIR/libgcc_s.so.1" "$LIBDIR/libgcc_s.so.1"
     fi
   '';
 
