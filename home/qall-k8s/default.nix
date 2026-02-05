@@ -31,6 +31,9 @@ in
   home.sessionVariables = {
     # コンテナ環境で未設定の場合があるため明示的に設定
     USER = "quipper";
+    # Nix パッケージが必要とする C++ ランタイムライブラリのパスを設定
+    # LD_PRELOAD の jemalloc や一部の Nix パッケージが libstdc++.so.6 を必要とする
+    LD_LIBRARY_PATH = "${pkgs.stdenv.cc.cc.lib}/lib";
   };
 
   # bash 起動時に自動で zsh に切り替え（kubectl exec -- bash 対応）
