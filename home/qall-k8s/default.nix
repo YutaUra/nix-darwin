@@ -1,10 +1,26 @@
-{ pkgs, lib, ... }: {
+{ pkgs, lib, ... }:
+let
+  # LD_PRELOAD の jemalloc がシステムの libstdc++ を必要とするため、
+  # zsh 起動前に LD_PRELOAD を解除するラッパー
+  zshWrapped = pkgs.symlinkJoin {
+    name = "zsh-wrapped";
+    paths = [ pkgs.zsh ];
+    buildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/zsh --unset LD_PRELOAD
+    '';
+  };
+in
+{
   imports = [
     ../common/shell-base.nix
     ../common/starship.nix
     ../common/git.nix
     ../common/claude-code.nix
   ];
+
+  # zsh パッケージをラッパー版に置き換え
+  programs.zsh.package = zshWrapped;
 
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (pkgs.lib.getName pkg) [
@@ -15,6 +31,17 @@
   home.sessionVariables = {
     # コンテナ環境で未設定の場合があるため明示的に設定
     USER = "quipper";
+  };
+
+  # bash 起動時に自動で zsh に切り替え（kubectl exec -- bash 対応）
+  programs.bash = {
+    enable = true;
+    initExtra = ''
+      # インタラクティブシェルかつ zsh が利用可能な場合、zsh に切り替え
+      if [[ $- == *i* ]] && command -v zsh &> /dev/null; then
+        exec zsh
+      fi
+    '';
   };
 
   home.packages = with pkgs; [
