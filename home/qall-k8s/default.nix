@@ -50,7 +50,7 @@ in
 
   # zsh ラッパースクリプト
   # シェバンにシステムの /bin/sh を使用（Nix の bash も libstdc++ 問題を抱えるため）
-  # NIX_LD を unset することで、zsh が RPATH で正しいライブラリを見つけられるようにする
+  # LD_PRELOAD（jemalloc 等）が Nix バイナリと競合するため unset
   home.file.".local/bin/zsh" = {
     executable = true;
     text = ''
@@ -58,9 +58,8 @@ in
       # コンテナ環境で未設定の場合があるため明示的に設定
       export USER="''${USER:-quipper}"
       export HOME="''${HOME:-/home/quipper}"
-      # NIX_LD が設定されていると Nix バイナリが RPATH ではなく LD_LIBRARY_PATH を使う
-      # zsh は Nix でビルドされているため、RPATH で正しいライブラリを見つけられる
-      unset NIX_LD NIX_LD_LIBRARY_PATH
+      # LD_PRELOAD の jemalloc がシステムの libstdc++ に依存するため、Nix 環境と競合する
+      unset LD_PRELOAD
       exec ${pkgs.zsh}/bin/zsh "$@"
     '';
   };
