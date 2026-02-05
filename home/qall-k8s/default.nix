@@ -50,7 +50,7 @@ in
 
   # zsh ラッパースクリプト
   # シェバンにシステムの /bin/sh を使用（Nix の bash も libstdc++ 問題を抱えるため）
-  # zsh バイナリ起動前に LD_LIBRARY_PATH を設定することで libstdc++ を解決
+  # NIX_LD を unset することで、zsh が RPATH で正しいライブラリを見つけられるようにする
   home.file.".local/bin/zsh" = {
     executable = true;
     text = ''
@@ -58,7 +58,9 @@ in
       # コンテナ環境で未設定の場合があるため明示的に設定
       export USER="''${USER:-quipper}"
       export HOME="''${HOME:-/home/quipper}"
-      export LD_LIBRARY_PATH="${nixLdLibraryPath}:$LD_LIBRARY_PATH"
+      # NIX_LD が設定されていると Nix バイナリが RPATH ではなく LD_LIBRARY_PATH を使う
+      # zsh は Nix でビルドされているため、RPATH で正しいライブラリを見つけられる
+      unset NIX_LD NIX_LD_LIBRARY_PATH
       exec ${pkgs.zsh}/bin/zsh "$@"
     '';
   };
