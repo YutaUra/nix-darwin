@@ -59,6 +59,35 @@ export HOME="${HOME:-/home/quipper}"
 mkdir -p "$HOME/.cache/nix"
 mkdir -p "$HOME/.config/nix"
 
+# Nix ストア内の libstdc++ を探して LD_LIBRARY_PATH を設定
+# Nix バイナリの起動に必要（NIX_LD 使用時にシステムライブラリを参照するため）
+setup_nix_ld_libs() {
+  echo "Nix ライブラリパスを設定中..."
+  LIBSTDCPP=$(/usr/bin/find /nix/store -name "libstdc++.so.6" 2>/dev/null | /usr/bin/head -1)
+  if [ -n "$LIBSTDCPP" ]; then
+    LIBDIR=$(/usr/bin/dirname "$LIBSTDCPP")
+    export LD_LIBRARY_PATH="$LIBDIR:/usr/lib/aarch64-linux-gnu:${LD_LIBRARY_PATH:-}"
+    echo "  LD_LIBRARY_PATH に $LIBDIR を追加"
+
+    # /etc/profile.d/ に永続設定を追加（ログイン時に自動適用）
+    PROFILE_SCRIPT="/etc/profile.d/nix-ld-libs.sh"
+    if [ ! -f "$PROFILE_SCRIPT" ] || ! grep -q "$LIBDIR" "$PROFILE_SCRIPT" 2>/dev/null; then
+      echo "  $PROFILE_SCRIPT を作成中..."
+      cat << EOF | sudo tee "$PROFILE_SCRIPT" > /dev/null
+# Nix バイナリが必要とする libstdc++ へのパス
+# NIX_LD 使用時にシステムの動的リンカーがこのパスを参照する
+export LD_LIBRARY_PATH="$LIBDIR:/usr/lib/aarch64-linux-gnu:\$LD_LIBRARY_PATH"
+EOF
+      sudo chmod 644 "$PROFILE_SCRIPT"
+    fi
+  else
+    echo "  警告: libstdc++.so.6 が見つかりません。初回ビルド後に再実行してください。"
+    export LD_LIBRARY_PATH="/usr/lib/aarch64-linux-gnu:${LD_LIBRARY_PATH:-}"
+  fi
+}
+
+setup_nix_ld_libs
+
 # home-manager 設定リポジトリの準備
 HM_DIR="$HOME/.config/home-manager"
 if [ ! -d "$HM_DIR" ]; then
@@ -71,7 +100,9 @@ fi
 
 # home-manager を適用
 echo "home-manager を適用中..."
-export LD_LIBRARY_PATH="/usr/lib/aarch64-linux-gnu:${LD_LIBRARY_PATH:-}"
 nix run home-manager -- switch --flake "$HM_DIR#qall-k8s" -b backup
+
+# home-manager 適用後、libstdc++ のパスが変わった可能性があるため再設定
+setup_nix_ld_libs
 
 echo "セットアップ完了"
