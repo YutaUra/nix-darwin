@@ -31,10 +31,17 @@ in
   home.sessionVariables = {
     # コンテナ環境で未設定の場合があるため明示的に設定
     USER = "quipper";
+    # NOTE: LD_LIBRARY_PATH は sessionVariables ではなく zsh initContent で設定
+    # sessionVariables で設定すると VS Code Server など非シェルプロセスにも影響し、
+    # システムの glibc (2.35) と Nix の libstdc++ (glibc 2.38 要求) の不整合でエラーになる
+  };
+
+  # シェル内でのみ LD_LIBRARY_PATH を設定（VS Code Server などには影響しない）
+  programs.zsh.initContent = ''
     # Nix パッケージが必要とする C++ ランタイムライブラリのパスを設定
     # LD_PRELOAD の jemalloc や一部の Nix パッケージが libstdc++.so.6 を必要とする
-    LD_LIBRARY_PATH = "${pkgs.stdenv.cc.cc.lib}/lib";
-  };
+    export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+  '';
 
   # bash 起動時に自動で zsh に切り替え（kubectl exec -- bash 対応）
   programs.bash = {
