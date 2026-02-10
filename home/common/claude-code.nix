@@ -31,6 +31,7 @@
     };
     env = {
       DISABLE_AUTOUPDATER = "1";
+      CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
     };
     language = "日本語";
   };
