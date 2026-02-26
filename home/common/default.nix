@@ -30,7 +30,8 @@
 
     # ランタイム
     nodejs_22
-    (corepack.overrideAttrs (old: { meta = old.meta // { priority = 0; }; }))
+    # doInstallCheck = false: nixpkgs upstream の Disable.test.ts が失敗するため一時的にテストをスキップ
+    (corepack.overrideAttrs (old: { doInstallCheck = false; meta = old.meta // { priority = 0; }; }))
 
     # IaC
     opentofu
