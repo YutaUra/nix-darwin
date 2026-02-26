@@ -11,6 +11,7 @@ profiles/        … プロファイル固有のシステム設定（private, re
 hosts/           … マシン固有の設定（hostPlatform, import の組み立て）
 home/common/     … 全プロファイル共通の home-manager 設定
 home/{profile}/  … プロファイル固有の home-manager 設定（private, recruit, qall-k8s）
+overlays/        … nixpkgs パッケージの一時的な override（nixpkgs が追いついたら削除）
 ```
 
 - `common/` はシステム設定（macOS defaults, fonts, sudo, homebrew, auto-update）

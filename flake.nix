@@ -18,6 +18,7 @@
           inherit system;
           specialArgs = { inherit username configName; };
           modules = [
+            { nixpkgs.overlays = [ (import ./overlays/claude-code.nix) ]; }
             ./hosts/${hostname}/default.nix
             nix-homebrew.darwinModules.nix-homebrew
             {
@@ -59,7 +60,10 @@
       };
 
       homeConfigurations."qall-k8s" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.aarch64-linux;
+        pkgs = import nixpkgs {
+          system = "aarch64-linux";
+          overlays = [ (import ./overlays/claude-code.nix) ];
+        };
         modules = [
           ./home/qall-k8s/default.nix
           {
