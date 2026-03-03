@@ -33,11 +33,11 @@
 
             tab name="main" focus=true {
                 pane split_direction="vertical" {
-                    pane size="60%" name="files" command="yazi"
-                    pane size="40%" split_direction="horizontal" {
-                        pane size="60%" focus=true name="claude" command="claude"
-                        pane size="40%" name="terminal" command="zsh"
+                    pane size="60%" split_direction="horizontal" {
+                        pane size="75%" name="files" command="yazi"
+                        pane size="25%" name="terminal" command="zsh"
                     }
+                    pane size="40%" focus=true name="claude" command="claude"
                 }
             }
         }
