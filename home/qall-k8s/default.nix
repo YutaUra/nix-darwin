@@ -17,6 +17,8 @@ in
     ../common/starship.nix
     ../common/git.nix
     ../common/claude-code.nix
+    ../common/zellij.nix
+    ../common/yazi.nix
   ];
 
   # zsh パッケージをラッパー版に置き換え

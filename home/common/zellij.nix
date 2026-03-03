@@ -1,0 +1,31 @@
+{ ... }: {
+  programs.zellij = {
+    enable = true;
+
+    layouts = {
+      "main" = ''
+        layout {
+            default_tab_template {
+                pane size=1 borderless=true {
+                    plugin location="zellij:tab-bar"
+                }
+                children
+                pane size=2 borderless=true {
+                    plugin location="zellij:status-bar"
+                }
+            }
+
+            tab name="main" focus=true {
+                pane split_direction="vertical" {
+                    pane size="60%" name="files" command="yazi"
+                    pane size="40%" split_direction="horizontal" {
+                        pane size="60%" focus=true name="claude" command="claude"
+                        pane size="40%" name="terminal" command="zsh"
+                    }
+                }
+            }
+        }
+      '';
+    };
+  };
+}
