@@ -2,6 +2,22 @@
   programs.zellij = {
     enable = true;
 
+    # keybinds は KDL の複雑な構造（shared_except 等）を使うため extraConfig で記述
+    extraConfig = ''
+      keybinds {
+          // kubectl exec が Ctrl+p を detach シーケンスとして横取りするため、
+          // Pane モードのキーを Ctrl+b に変更
+          shared_except "pane" "locked" {
+              unbind "Ctrl p"
+              bind "Ctrl b" { SwitchToMode "Pane"; }
+          }
+          pane {
+              unbind "Ctrl p"
+              bind "Ctrl b" { SwitchToMode "Normal"; }
+          }
+      }
+    '';
+
     layouts = {
       "main" = ''
         layout {
