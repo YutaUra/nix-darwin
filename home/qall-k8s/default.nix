@@ -2,12 +2,19 @@
 let
   # LD_PRELOAD の jemalloc がシステムの libstdc++ を必要とするため、
   # zsh 起動前に LD_PRELOAD を解除するラッパー
+  # wrapProgram を使わない理由:
+  # wrapProgram は Nix の bash を shebang に使うが、その bash 自体が
+  # libstdc++.so.6 に依存するため、symlink 未作成の環境で起動できない。
+  # /bin/sh ならシステムの sh を使うので依存がない。
   zshWrapped = pkgs.symlinkJoin {
     name = "zsh-wrapped";
     paths = [ pkgs.zsh ];
-    buildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
-      wrapProgram $out/bin/zsh --unset LD_PRELOAD
+      rm $out/bin/zsh
+      echo '#!/bin/sh' > $out/bin/zsh
+      echo 'unset LD_PRELOAD' >> $out/bin/zsh
+      echo 'exec ${pkgs.zsh}/bin/zsh "$@"' >> $out/bin/zsh
+      chmod +x $out/bin/zsh
     '';
   };
 in
@@ -58,6 +65,7 @@ in
 
   home.packages = with pkgs; [
     # CLI ツール
+    fd
     ripgrep
     gh
 

@@ -11,6 +11,7 @@
 
   home.packages = with pkgs; [
     # CLI ツール
+    fd
     ripgrep
     awscli2
     ffmpeg
