@@ -68,6 +68,7 @@ in
     fd
     ripgrep
     gh
+    fresh-editor
 
     # 開発ツール
     claude-code
