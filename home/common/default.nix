@@ -21,6 +21,8 @@
     # 開発ツール
     claude-code
     gh
+    gws
+    google-cloud-sdk
 
     # Docker 関連
     colima

@@ -72,6 +72,8 @@ in
 
     # 開発ツール
     claude-code
+    gws
+    google-cloud-sdk
 
     # Docker（build 用）
     docker-client

@@ -7,7 +7,6 @@
     casks = [
       "1password"
       "claude"
-      "cmux"
       "devtoys"
       "displaylink"
       "figma-agent"
