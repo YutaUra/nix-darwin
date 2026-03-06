@@ -3,7 +3,7 @@ let
   # buildNpmPackage を使わない理由:
   # 頻繁にリリースされる npm パッケージで npmDepsHash 維持コストが高い。
   m365-cli = pkgs.writeShellScriptBin "m365" ''
-    exec ${pkgs.lib.getExe pkgs.nodejs} ${pkgs.lib.getExe' pkgs.nodejs "npx"} --yes @pnp/cli-microsoft365@latest "$@"
+    exec ${pkgs.lib.getExe pkgs.nodejs} ${pkgs.lib.getExe' pkgs.nodejs "npx"} --yes --package @pnp/cli-microsoft365@latest m365 "$@"
   '';
 in
 {
