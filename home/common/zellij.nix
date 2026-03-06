@@ -39,7 +39,9 @@
                         }
                         pane size="25%" name="terminal" command="zsh"
                     }
-                    pane size="40%" focus=true name="claude" command="claude"
+                    pane size="40%" focus=true name="claude" command="claude" {
+                        args "-c"
+                    }
                 }
             }
         }
