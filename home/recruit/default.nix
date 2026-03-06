@@ -1,4 +1,12 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+let
+  # buildNpmPackage を使わない理由:
+  # 頻繁にリリースされる npm パッケージで npmDepsHash 維持コストが高い。
+  m365-cli = pkgs.writeShellScriptBin "m365" ''
+    exec ${pkgs.lib.getExe pkgs.nodejs} ${pkgs.lib.getExe' pkgs.nodejs "npx"} --yes @pnp/cli-microsoft365@latest "$@"
+  '';
+in
+{
   imports = [
     ./git.nix
   ];
@@ -11,6 +19,9 @@
 
     # Python
     uv
+
+    # Microsoft 365
+    m365-cli
   ];
 
   # kubectl exec 時に特定 pod/namespace で背景色を変更（危険な操作の視覚的警告）
