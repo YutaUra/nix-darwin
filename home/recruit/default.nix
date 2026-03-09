@@ -91,15 +91,20 @@ in
           [[ "$arg" == "--" ]] && found_dashdash=true
         done
 
+        # DECSTR (Soft Terminal Reset) で DEC private モードを一括リセット。
+        # Kitty キーボードプロトコルは独自のスタック機構のため別途 pop。
+        local RESET_TERM="''${ESC}[!p''${ESC}[<u''${ESC}[<u''${ESC}[<u''${ESC}[<u''${ESC}[<u"
+
         if [[ -n "$color" ]]; then
           local SET_BG="''${ESC}]11;''${color}''${BEL}"
           printf '%s' "$SET_BG"
-          trap 'printf "%s" "$RESET_BG"' EXIT INT TERM
+          trap 'printf "%s" "''${RESET_TERM}''${RESET_BG}"' EXIT INT TERM
           command kubectl "''${new_args[@]}"
-          printf '%s' "$RESET_BG"
+          printf '%s' "''${RESET_TERM}''${RESET_BG}"
           trap - EXIT INT TERM
         else
           command kubectl "''${new_args[@]}"
+          printf '%s' "$RESET_TERM"
         fi
       else
         command kubectl "$@"
