@@ -5,6 +5,7 @@
     ./git.nix
     ./ghostty.nix
     ./claude-code.nix
+    ./direnv.nix
   ];
 
   home.stateVersion = "24.11";

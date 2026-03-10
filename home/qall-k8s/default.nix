@@ -26,6 +26,7 @@ in
     ../common/claude-code.nix
     ../common/zellij.nix
     ../common/yazi.nix
+    ../common/direnv.nix
   ];
 
   # zsh パッケージをラッパー版に置き換え
