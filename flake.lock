@@ -42,11 +42,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1773291481,
-        "narHash": "sha256-x9WW0T1HeJXP1pGagbIJ0M5OGnZhwSiVhOFoWQWLAeE=",
+        "lastModified": 1773298600,
+        "narHash": "sha256-NPUEp+6q5Pj0CFaM+nRZHMdHfzsVIUrcZHFvi7eeexI=",
         "owner": "YutaUra",
         "repo": "gati",
-        "rev": "346f74a16a9c5ec0e5c82b3a2948a7b4f5da0461",
+        "rev": "bf133dd66e4f9c50618614a3d98850d326b4b2fa",
         "type": "github"
       },
       "original": {
