@@ -63,7 +63,7 @@
       homeConfigurations."qall-k8s" = home-manager.lib.homeManagerConfiguration {
         pkgs = import nixpkgs {
           system = "aarch64-linux";
-          overlays = [ (import ./overlays/claude-code.nix) (import ./overlays/gws.nix) ];
+          overlays = [ (import ./overlays/claude-code.nix) (import ./overlays/gws.nix) (final: _: { gati = inputs.gati.packages.${final.system}.default; }) ];
         };
         modules = [
           ./home/qall-k8s/default.nix
