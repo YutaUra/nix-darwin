@@ -2,35 +2,16 @@
   programs.zellij = {
     enable = true;
 
-    # keybinds は KDL の複雑な構造（shared_except 等）を使うため extraConfig で記述
+    # default_mode を locked にすることで、通常時は全キーがアプリに透過する。
+    # Ctrl+G で unlock → モードキーの2ステップで zellij を操作する。
+    # これにより Ctrl+B, Ctrl+P 等のキーバインド衝突が解消される。
     extraConfig = ''
-      keybinds {
-          // kubectl exec が Ctrl+p を detach シーケンスとして横取りするため、
-          // Pane モードのキーを Ctrl+b に変更
-          shared_except "pane" "locked" {
-              unbind "Ctrl p"
-              bind "Ctrl b" { SwitchToMode "Pane"; }
-          }
-          pane {
-              unbind "Ctrl p"
-              bind "Ctrl b" { SwitchToMode "Normal"; }
-          }
-      }
+      default_mode "locked"
     '';
 
     layouts = {
       "main" = ''
         layout {
-            default_tab_template {
-                pane size=1 borderless=true {
-                    plugin location="zellij:tab-bar"
-                }
-                children
-                pane size=2 borderless=true {
-                    plugin location="zellij:status-bar"
-                }
-            }
-
             tab name="main" focus=true {
                 pane split_direction="vertical" {
                     pane size="60%" split_direction="horizontal" {
