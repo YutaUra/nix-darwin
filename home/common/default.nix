@@ -6,6 +6,7 @@
     ./ghostty.nix
     ./claude-code.nix
     ./direnv.nix
+    ./zellij.nix
   ];
 
   home.stateVersion = "24.11";
@@ -21,6 +22,7 @@
 
     # 開発ツール
     claude-code
+    gati
     gh
     gws
     google-cloud-sdk
