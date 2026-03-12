@@ -34,7 +34,7 @@
             tab name="main" focus=true {
                 pane split_direction="vertical" {
                     pane size="60%" split_direction="horizontal" {
-                        pane size="75%" name="editor" command="fresh" {
+                        pane size="75%" name="editor" command="gati" {
                             args "."
                         }
                         pane size="25%" name="terminal" command="zsh"

@@ -69,7 +69,7 @@ in
     fd
     ripgrep
     gh
-    fresh-editor
+    gati
 
     # 開発ツール
     claude-code
