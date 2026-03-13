@@ -67,7 +67,11 @@ home-manager switch --flake .#qall-k8s
 - マシン固有（homebrew casks 等）→ `hosts/{name}/`
 - Nix module system によりリスト型（`home.packages`, `homebrew.casks` 等）は複数モジュールから定義するとマージされる
 
+## Git ワークフロー
+
+- PR は不要。main ブランチに直接 commit & push する
+- コミットメッセージは日本語で書く
+
 ## 注意
 
 - 新規 .nix ファイル作成後は `git add` が必要（flake は Git 追跡ファイルのみ評価）
-- コミットメッセージは日本語で書く
