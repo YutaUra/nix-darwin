@@ -66,6 +66,7 @@ in
           "document-skills@anthropic-agent-skills" = true;
         };
         env = {
+          CLAUDE_CODE_DISABLE_AUTO_MEMORY = "1";
           DISABLE_AUTOUPDATER = "1";
           CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
           # CLAUDE_CODE_USE_BEDROCK = "1";

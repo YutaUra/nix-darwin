@@ -7,6 +7,7 @@
     ./claude-code.nix
     ./direnv.nix
     ./zellij.nix
+    ./zyouz.nix
   ];
 
   home.stateVersion = "24.11";
