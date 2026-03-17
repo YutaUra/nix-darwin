@@ -15,6 +15,7 @@
     # CLI ツール
     fd
     ripgrep
+    duckdb
     awscli2
     ffmpeg
     ncdu

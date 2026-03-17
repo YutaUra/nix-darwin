@@ -68,6 +68,7 @@ in
     # CLI ツール
     fd
     ripgrep
+    duckdb
     gh
     gati
 
