@@ -31,6 +31,7 @@ fi
 # ビルドユーザー分離を無効化して daemon が root でビルドを実行するようにする
 if [ -d /nix ] && ! grep -q '^build-users-group\s*=$' /etc/nix/nix.conf 2>/dev/null; then
   echo "build-users-group を無効化中..."
+  sudo mkdir -p /etc/nix
   echo 'build-users-group =' | sudo tee -a /etc/nix/nix.conf > /dev/null
 fi
 
