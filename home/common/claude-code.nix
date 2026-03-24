@@ -56,6 +56,7 @@ in
         DISABLE_AUTOUPDATER = "1";
         CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
       };
+      defaultMode = "auto";
       language = "日本語";
     };
   } // gwsSkills.skillFiles;
