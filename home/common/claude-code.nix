@@ -29,6 +29,9 @@ in
     ".claude/skills/playwright-cli/references/tracing.md".source = ./claude-md/skills/playwright-cli/references/tracing.md;
     ".claude/skills/playwright-cli/references/video-recording.md".source = ./claude-md/skills/playwright-cli/references/video-recording.md;
 
+    ".claude/skills/tuning/SKILL.md".source = ./claude-md/skills/tuning/SKILL.md;
+    ".claude/skills/tuning/references/config-hierarchy.md".source = ./claude-md/skills/tuning/references/config-hierarchy.md;
+
     ".claude/settings.json".text = builtins.toJSON {
       enabledPlugins = {
         "figma@claude-plugins-official" = true;
