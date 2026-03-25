@@ -56,6 +56,8 @@ in
         DISABLE_AUTOUPDATER = "1";
         CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
       };
+      model = "opus";
+      effortLevel = "high";
       defaultMode = "auto";
       language = "日本語";
     };
