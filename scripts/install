@@ -29,15 +29,24 @@ fi
 
 # コンテナ環境では nixbld グループが存在しないため、
 # ビルドユーザー分離を無効化して daemon が root でビルドを実行するようにする
-if [ -d /nix ] && ! grep -q '^build-users-group\s*=$' /etc/nix/nix.conf 2>/dev/null; then
-  echo "build-users-group を無効化中..."
+if [ -d /nix ]; then
   sudo mkdir -p /etc/nix
-  echo 'build-users-group =' | sudo tee -a /etc/nix/nix.conf > /dev/null
+  if grep -q '^build-users-group' /etc/nix/nix.conf 2>/dev/null; then
+    # 既存の build-users-group 行を空値に置換
+    # append だと先に定義された値が優先されるため sed で置換する
+    echo "build-users-group を無効化中..."
+    sudo sed -i 's/^build-users-group.*/build-users-group =/' /etc/nix/nix.conf
+  elif ! grep -q '^build-users-group' /etc/nix/nix.conf 2>/dev/null; then
+    echo "build-users-group を無効化中..."
+    echo 'build-users-group =' | sudo tee -a /etc/nix/nix.conf > /dev/null
+  fi
 fi
 
 # Nix daemon を起動（--init none でインストールした場合は自動起動しないため）
 if [ -d /nix ] && ! pgrep -x nix-daemon > /dev/null 2>&1; then
   echo "Nix daemon を起動中..."
+  # コンテナ環境ではスタックサイズのハードリミットが小さいため拡大
+  ulimit -Hs 65536 2>/dev/null || true
   sudo /nix/var/nix/profiles/default/bin/nix-daemon &
 
   # daemon が応答するまで待機（最大30秒）
