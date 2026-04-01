@@ -55,9 +55,21 @@ in
       env = {
         DISABLE_AUTOUPDATER = "1";
         CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+        # CLAUDE_CODE_USE_BEDROCK = "1";
+        # AWS_PROFILE = "jp-sandbox";
+        # ANTHROPIC_MODEL = "jp.anthropic.claude-sonnet-4-5-20250929-v1:0";
+        # AWS_REGION = "ap-northeast-1";
+      };
+      permissions = {
+        allow = [
+          "WebSearch"
+          "mcp__plugin_context7_context7__resolve-library-id"
+          "mcp__plugin_context7_context7__query-docs"
+        ];
       };
       model = "opus";
       effortLevel = "high";
+      autoMemoryEnabled = false;
       defaultMode = "auto";
       language = "日本語";
     };
