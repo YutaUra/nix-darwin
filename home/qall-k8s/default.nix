@@ -51,6 +51,12 @@ in
     # Nix パッケージが必要とする C++ ランタイムライブラリのパスを設定
     # LD_PRELOAD の jemalloc や一部の Nix パッケージが libstdc++.so.6 を必要とする
     export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
+    # システムのランタイム（ruby, node 等）を Nix より優先
+    # ベースイメージの /usr/local/bin, /usr/bin を Nix パスより前に配置し、
+    # Nix 版はフォールバックとして残す
+    typeset -U path
+    path=(/usr/local/bin /usr/bin $path)
   '';
 
   # bash 起動時に自動で zsh に切り替え（kubectl exec -- bash 対応）
