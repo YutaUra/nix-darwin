@@ -42,12 +42,19 @@ if [ -d /nix ]; then
   fi
 fi
 
-# Nix daemon を起動（--init none でインストールした場合は自動起動しないため）
+# nix.conf 変更を反映するため、既存の daemon を停止
+if pgrep -x nix-daemon > /dev/null 2>&1; then
+  echo "Nix daemon を再起動するため停止中..."
+  sudo pkill -x nix-daemon || true
+  sleep 1
+fi
+
+# Nix daemon を起動
 if [ -d /nix ] && ! pgrep -x nix-daemon > /dev/null 2>&1; then
   echo "Nix daemon を起動中..."
-  # コンテナ環境ではスタックサイズのハードリミットが小さいため拡大
-  ulimit -Hs 65536 2>/dev/null || true
-  sudo /nix/var/nix/profiles/default/bin/nix-daemon &
+  # コンテナ環境ではスタックサイズのハードリミットが小さいため、
+  # sudo 越しに ulimit を設定してから daemon を起動する
+  sudo sh -c 'ulimit -Hs 65536 2>/dev/null; exec /nix/var/nix/profiles/default/bin/nix-daemon' &
 
   # daemon が応答するまで待機（最大30秒）
   echo "Nix daemon の起動を待機中..."
