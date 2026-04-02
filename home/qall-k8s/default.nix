@@ -32,6 +32,12 @@ in
   # zsh パッケージをラッパー版に置き換え
   programs.zsh.package = zshWrapped;
 
+  _claude.extraPermissions = [
+    "Read(//quipper/monorepo/**)"
+    "Edit(//quipper/monorepo/**)"
+    "Write(//quipper/monorepo/**)"
+  ];
+
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (pkgs.lib.getName pkg) [
       "claude-code"
