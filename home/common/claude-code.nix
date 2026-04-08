@@ -33,6 +33,7 @@ in
       ".claude/skills/claude-code-rules/SKILL.md".source = ./claude-md/skills/claude-code-rules/SKILL.md;
       ".claude/skills/claude-code-rules/references/rule-format.md".source = ./claude-md/skills/claude-code-rules/references/rule-format.md;
 
+<<<<<<< HEAD
       ".claude/skills/playwright-cli/SKILL.md".source = ./claude-md/skills/playwright-cli/SKILL.md;
       ".claude/skills/playwright-cli/references/request-mocking.md".source = ./claude-md/skills/playwright-cli/references/request-mocking.md;
       ".claude/skills/playwright-cli/references/running-code.md".source = ./claude-md/skills/playwright-cli/references/running-code.md;

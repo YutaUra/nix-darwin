@@ -15,6 +15,7 @@
       "raycast"
       "rectangle"
       "slack"
+      "superset"
       "visual-studio-code"
       "zoom"
     ];

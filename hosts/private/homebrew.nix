@@ -1,3 +1,7 @@
 { ... }: {
-  # private 固有の Homebrew casks
+  homebrew = {
+    casks = [
+      "salesforce-cli"
+    ];
+  };
 }

@@ -28,7 +28,7 @@
                               },
                           },
                           .{
-                              .command = .{ "claude", "-c" },
+                              .command = .{ "claude", "-c", "--permission-mode", "auto" },
                               .size = .{ .percent = 40 },
                               .name = "claude",
                           },
