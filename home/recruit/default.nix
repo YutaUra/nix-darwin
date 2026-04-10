@@ -24,6 +24,19 @@ in
     m365-cli
   ];
 
+  # aqua (aquaproj/aqua) でインストールされた CLI を PATH に追加する
+  # XDG_DATA_HOME を設定していないため、デフォルトの $HOME/.local/share/aquaproj-aqua/bin を使用
+  home.sessionPath = [
+    "$HOME/.local/share/aquaproj-aqua/bin"
+  ];
+
+  # グローバル設定ファイルを指定し、どのディレクトリからでも共通の CLI を使えるようにする
+  # 実ファイル ~/.config/aquaproj-aqua/aqua.yaml はユーザーが手動で作成する（秘密情報ではないが
+  # 個人の好みが強く出るため Nix 管理下には置かない）
+  home.sessionVariables = {
+    AQUA_GLOBAL_CONFIG = "$HOME/.config/aquaproj-aqua/aqua.yaml";
+  };
+
   # kubectl exec 時に特定 pod/namespace で背景色を変更（危険な操作の視覚的警告）
   programs.zsh.initContent = ''
     kubectl() {
@@ -110,5 +123,18 @@ in
         command kubectl "$@"
       fi
     }
+
+    # aqua の zsh 補完を有効化
+    # `aqua completion zsh` を毎回実行する実装にしない理由:
+    # シェル起動のたびにサブシェルで Go バイナリを叩くのは遅いため、
+    # バイナリの mtime と比較してキャッシュを作るパターンを採用した。
+    if command -v aqua >/dev/null 2>&1; then
+      local aqua_comp_cache="$HOME/.cache/aqua-completion.zsh"
+      if [[ ! -f "$aqua_comp_cache" || "$(command -v aqua)" -nt "$aqua_comp_cache" ]]; then
+        mkdir -p "$HOME/.cache"
+        aqua completion zsh > "$aqua_comp_cache"
+      fi
+      source "$aqua_comp_cache"
+    fi
   '';
 }
