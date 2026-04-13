@@ -20,6 +20,9 @@ in
     # Python
     uv
 
+    # PDF
+    poppler-utils
+
     # Microsoft 365
     m365-cli
   ];
