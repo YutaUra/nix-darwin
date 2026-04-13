@@ -15,10 +15,17 @@ let
   ];
 in
 {
-  options._claude.extraPermissions = lib.mkOption {
-    type = lib.types.listOf lib.types.str;
-    default = [];
-    description = "プロファイル固有の Claude Code パーミッションルール";
+  options._claude = {
+    extraPermissions = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      description = "プロファイル固有の Claude Code パーミッションルール";
+    };
+    extraPlugins = lib.mkOption {
+      type = lib.types.attrsOf lib.types.bool;
+      default = {};
+      description = "プロファイル固有の Claude Code プラグイン";
+    };
   };
 
   config = {
@@ -60,11 +67,8 @@ in
           "ralph-loop@claude-plugins-official" = true;
           "learning-output-style@claude-plugins-official" = true;
           "greptile@claude-plugins-official" = true;
-          "stripe@claude-plugins-official" = true;
-          "superpowers@claude-plugins-official" = true;
-          "example-skills@anthropic-agent-skills" = true;
           "document-skills@anthropic-agent-skills" = true;
-        };
+        } // config._claude.extraPlugins;
         env = {
           CLAUDE_CODE_DISABLE_AUTO_MEMORY = "1";
           DISABLE_AUTOUPDATER = "1";

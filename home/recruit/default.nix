@@ -27,6 +27,10 @@ in
     m365-cli
   ];
 
+  _claude.extraPlugins = {
+    "yutaura-tools@sapuri-agent-skills" = true;
+  };
+
   # aqua (aquaproj/aqua) でインストールされた CLI を PATH に追加する
   # XDG_DATA_HOME を設定していないため、デフォルトの $HOME/.local/share/aquaproj-aqua/bin を使用
   home.sessionPath = [
