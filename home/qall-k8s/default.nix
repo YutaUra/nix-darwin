@@ -99,6 +99,12 @@ in
     ruby
   ];
 
+  # install スクリプトを最新版に同期
+  home.activation.deployInstallScript = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    mkdir -p /quipper/dotfiles
+    install -m 755 ${../../scripts/install} /quipper/dotfiles/install
+  '';
+
   # Nix の C++ ランタイムライブラリをシステムの場所にシンボリックリンク
   # これにより LD_PRELOAD の jemalloc が必要なライブラリを見つけられる
   home.activation.setupCppRuntime = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
