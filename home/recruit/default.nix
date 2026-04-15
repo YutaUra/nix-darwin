@@ -28,7 +28,7 @@ in
   ];
 
   _claude.extraPlugins = {
-    "yutaura-tools@sapuri-agent-skills" = true;
+    "yutaura-tools@sapuri-agent-plugins" = true;
   };
 
   # aqua (aquaproj/aqua) でインストールされた CLI を PATH に追加する
