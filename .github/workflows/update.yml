@@ -1,4 +1,4 @@
-name: Update Flake Inputs
+name: Update Dependencies
 
 on:
   schedule:
@@ -16,14 +16,24 @@ jobs:
 
       - uses: DeterminateSystems/nix-installer-action@main
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # --- flake inputs ---
       - name: Update flake inputs
         run: nix flake update
 
+      # --- claude-code ---
+      - name: Update claude-code
+        run: bash scripts/update-claude-code.sh
+
+      # --- commit & push ---
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add flake.lock
+          git add flake.lock overlays/claude-code.nix overlays/claude-code-package-lock.json
           git diff --cached --quiet && echo "Already up to date" && exit 0
-          git commit -m "flake.lock を更新"
+          git commit -m "依存パッケージを更新"
           git push
