@@ -27,6 +27,12 @@ if [ ! -d /nix ]; then
   curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install linux --init none --no-confirm
 fi
 
+# サンドボックスなし環境では Nix がビルド時に /homeless-shelter を HOME として使う。
+# 前回のビルドで残った /homeless-shelter があると "exists; please remove it" エラーになるため削除する。
+if [ -d /homeless-shelter ]; then
+  sudo rm -rf /homeless-shelter
+fi
+
 # コンテナ環境では nixbld グループが存在しないため、
 # ビルドユーザー分離を無効化して daemon が root でビルドを実行するようにする
 if [ -d /nix ]; then

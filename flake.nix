@@ -65,7 +65,12 @@
       homeConfigurations."qall-k8s" = home-manager.lib.homeManagerConfiguration {
         pkgs = import nixpkgs {
           system = "aarch64-linux";
-          overlays = [ (import ./overlays/claude-code.nix) (import ./overlays/gws.nix) (final: _: { gati = inputs.gati.packages.${final.system}.default; zyouz = inputs.zyouz.packages.${final.system}.default; }) ];
+          overlays = [
+            (import ./overlays/claude-code.nix)
+            (import ./overlays/gws.nix)
+            # コンテナ環境では TTY がなく gati のテストが失敗するため doCheck を無効化
+            (final: _: { gati = inputs.gati.packages.${final.system}.default.overrideAttrs { doCheck = false; }; zyouz = inputs.zyouz.packages.${final.system}.default; })
+          ];
         };
         modules = [
           zyouz.homeManagerModules.default
