@@ -30,6 +30,7 @@
                           .{
                               .command = .{ "claude", "-c", "--permission-mode", "auto" },
                               .size = .{ .percent = 40 },
+                              .mouse = .passthrough,
                               .name = "claude",
                           },
                       },

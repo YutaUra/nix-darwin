@@ -68,11 +68,13 @@ in
           "learning-output-style@claude-plugins-official" = true;
           "greptile@claude-plugins-official" = true;
           "document-skills@anthropic-agent-skills" = true;
+          "figma-implementation-core@sapuri-agent-plugins" = true;
         } // config._claude.extraPlugins;
         env = {
           CLAUDE_CODE_DISABLE_AUTO_MEMORY = "1";
           DISABLE_AUTOUPDATER = "1";
           CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+          CLAUDE_CODE_NO_FLICKER = "1";
           # CLAUDE_CODE_USE_BEDROCK = "1";
           # AWS_PROFILE = "jp-sandbox";
           # ANTHROPIC_MODEL = "jp.anthropic.claude-sonnet-4-5-20250929-v1:0";
