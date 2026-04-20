@@ -50,11 +50,22 @@ in
   };
 
   programs.zsh.initContent = ''
-    # システムのランタイム（ruby, node 等）を Nix より優先
-    # ベースイメージの /usr/local/bin, /usr/bin を Nix パスより前に配置し、
-    # Nix 版はフォールバックとして残す
+    # PATH を「image > aqua > nix > 既存」の順に構成する。
+    #
+    # 既存値に依存しない形で書く理由:
+    # kubectl exec 経由の zsh が何らかの経路で login shell 相当になると
+    # /etc/zsh/zprofile 経由で /etc/profile が走り、PATH が
+    # /usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games に上書きされる。
+    # この場合 $path には既に nix-profile も aqua も含まれないため、単なる
+    # 先頭追加では補強にならない。必要なディレクトリを明示的に積み直す。
     typeset -U path
-    path=(/usr/local/bin /usr/bin $path)
+    path=(
+      /usr/local/bin
+      /usr/bin
+      /home/quipper/.local/share/aquaproj-aqua/bin
+      /home/quipper/.nix-profile/bin
+      $path
+    )
   '';
 
   # bash 起動時に自動で zsh に切り替え（kubectl exec -- bash 対応）
