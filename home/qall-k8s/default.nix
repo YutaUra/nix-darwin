@@ -105,4 +105,18 @@ in
       echo "$ZSH_PATH" | /usr/bin/sudo tee -a /etc/shells
     fi
   '';
+
+  # /usr/local/bin/zsh に zshWrapped の shim を設置する。
+  # kubectl exec -- zsh は PATH 解決で /usr/bin/zsh を拾うため、zshWrapped の
+  # unset LD_PRELOAD が走らず、後続の Nix プロセス（starship 等）で
+  # LD_PRELOAD=/usr/lib/libjemalloc.so.2 が生きたまま走り、jemalloc の
+  # libstdc++.so.6 依存を Nix 動的リンカが解決できずに失敗する。
+  # /usr/local/bin は PATH で /usr/bin より優先されるので、ここに shim を
+  # 置けば zsh の経路だけ確実に zshWrapped を通せる。
+  # PATH を並べ替える方式を採らない理由: overlay の path-env.yaml が
+  # 「image > aqua > nix」を明示ポリシーとしているため、ruby や node など
+  # image 側 CLI の解決順序を崩さないようにする。
+  home.activation.installZshShim = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    /usr/bin/sudo /usr/bin/ln -sfn "${zshWrapped}/bin/zsh" /usr/local/bin/zsh
+  '';
 }
