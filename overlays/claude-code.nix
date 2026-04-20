@@ -1,44 +1,61 @@
 # nixpkgs の claude-code が古い場合に最新版へ差し替える overlay
-# nixpkgs が追いついたらこのファイルと claude-code-package-lock.json を削除する
-final: prev: {
-  claude-code = prev.buildNpmPackage (finalAttrs: {
+# nixpkgs が追いついたらこのファイルと claude-code-manifest.json を削除する
+final: prev:
+let
+  stdenv = prev.stdenvNoCC;
+  baseUrl = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases";
+  manifest = prev.lib.importJSON ./claude-code-manifest.json;
+  platformKey = "${stdenv.hostPlatform.node.platform}-${stdenv.hostPlatform.node.arch}";
+  platformManifestEntry = manifest.platforms.${platformKey};
+in
+{
+  claude-code = stdenv.mkDerivation (finalAttrs: {
     pname = "claude-code";
-    version = "2.1.114";
+    inherit (manifest) version;
 
-    src = prev.fetchzip {
-      url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${finalAttrs.version}.tgz";
-      hash = "sha256-r78N6eE/8JQsHP8XTWP9efkbzkmuV+o7JSB1GxrlE3E=";
+    src = prev.fetchurl {
+      url = "${baseUrl}/${finalAttrs.version}/${platformKey}/claude";
+      sha256 = platformManifestEntry.checksum;
     };
 
-    npmDepsHash = "sha256-ymfM4CGoBnotxinqsf51Mjr7Uh5Rl1EIFfLhd14a3uc=";
+    dontUnpack = true;
+    dontBuild = true;
+    __noChroot = stdenv.hostPlatform.isDarwin;
+    # bun ランタイムとして実行されないよう strip を無効化
+    dontStrip = true;
+
+    nativeBuildInputs = [
+      prev.installShellFiles
+      prev.makeBinaryWrapper
+    ]
+    ++ prev.lib.optionals stdenv.hostPlatform.isElf [ prev.autoPatchelfHook ];
 
     strictDeps = true;
 
-    postPatch = ''
-      cp ${./claude-code-package-lock.json} package-lock.json
+    installPhase = ''
+      runHook preInstall
 
-      substituteInPlace cli.js \
-            --replace-fail '#!/bin/sh' '#!/usr/bin/env sh'
-    '';
+      installBin $src
 
-    dontNpmBuild = true;
-
-    env.AUTHORIZED = "1";
-
-    postInstall = ''
       wrapProgram $out/bin/claude \
         --set DISABLE_AUTOUPDATER 1 \
+        --set-default FORCE_AUTOUPDATE_PLUGINS 1 \
         --set DISABLE_INSTALLATION_CHECKS 1 \
-        --unset DEV \
+        --set USE_BUILTIN_RIPGREP 0 \
         --prefix PATH : ${
           prev.lib.makeBinPath (
-            [ prev.procps ]
-            ++ prev.lib.optionals prev.stdenv.hostPlatform.isLinux [
+            [
+              prev.procps
+              prev.ripgrep
+            ]
+            ++ prev.lib.optionals stdenv.hostPlatform.isLinux [
               prev.bubblewrap
               prev.socat
             ]
           )
         }
+
+      runHook postInstall
     '';
 
     doInstallCheck = true;
@@ -47,6 +64,7 @@ final: prev: {
       prev.versionCheckHook
     ];
     versionCheckKeepEnvironment = [ "HOME" ];
+    versionCheckProgramArg = "--version";
 
     meta = {
       description = "Agentic coding tool that lives in your terminal, understands your codebase, and helps you code faster";

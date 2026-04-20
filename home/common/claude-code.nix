@@ -88,6 +88,7 @@ in
         autoMemoryEnabled = false;
         defaultMode = "auto";
         language = "日本語";
+        feedbackSurveyRate = 0;
       };
     } // gwsSkills.skillFiles;
   };
