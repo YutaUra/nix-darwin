@@ -29,7 +29,7 @@ in
 
   _claude.extraPlugins = {
     "yutaura-tools@sapuri-agent-plugins" = true;
-    "m365@sapuri-agent-skills" = true;
+    "m365@sapuri-agent-plugins" = true;
   };
 
   # aqua (aquaproj/aqua) でインストールされた CLI を PATH に追加する
