@@ -52,6 +52,10 @@ in
       ".claude/skills/tuning/SKILL.md".source = ./claude-md/skills/tuning/SKILL.md;
       ".claude/skills/tuning/references/config-hierarchy.md".source = ./claude-md/skills/tuning/references/config-hierarchy.md;
 
+      ".claude/skills/repo-kickoff/SKILL.md".source = ./claude-md/skills/repo-kickoff/SKILL.md;
+      ".claude/skills/repo-kickoff/references/interview-questions.md".source = ./claude-md/skills/repo-kickoff/references/interview-questions.md;
+      ".claude/skills/repo-kickoff/references/output-templates.md".source = ./claude-md/skills/repo-kickoff/references/output-templates.md;
+
       ".claude/settings.json".text = builtins.toJSON {
         enabledPlugins = {
           "figma@claude-plugins-official" = true;
