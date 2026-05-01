@@ -56,6 +56,10 @@ in
       ".claude/skills/repo-kickoff/references/interview-questions.md".source = ./claude-md/skills/repo-kickoff/references/interview-questions.md;
       ".claude/skills/repo-kickoff/references/output-templates.md".source = ./claude-md/skills/repo-kickoff/references/output-templates.md;
 
+      ".claude/skills/decision-council/SKILL.md".source = ./claude-md/skills/decision-council/SKILL.md;
+      ".claude/skills/decision-council/references/role-definitions.md".source = ./claude-md/skills/decision-council/references/role-definitions.md;
+      ".claude/skills/decision-council/references/decision-mechanics.md".source = ./claude-md/skills/decision-council/references/decision-mechanics.md;
+
       ".claude/settings.json".text = builtins.toJSON {
         enabledPlugins = {
           "figma@claude-plugins-official" = true;
