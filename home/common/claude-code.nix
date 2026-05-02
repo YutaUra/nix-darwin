@@ -1,6 +1,7 @@
 { pkgs, lib, config, ... }:
 let
   gwsSkills = import ../../pkgs/gws-skills.nix { inherit (pkgs) lib fetchFromGitHub; };
+  yutauraRules = import ../../pkgs/yutaura-rules.nix { inherit (pkgs) lib fetchFromGitHub; };
 
   # buildNpmPackage を使わない理由:
   # v0.1.1 で頻繁に更新され、alpha 版 playwright 依存で npmDepsHash 維持コストが高い。
@@ -33,32 +34,6 @@ in
 
     home.file = {
       ".claude/CLAUDE.md".source = ./claude-md/CLAUDE.md;
-      ".claude/rules/documentation-principles.md".source = ./claude-md/rules/documentation-principles.md;
-      ".claude/rules/tdd-guidelines.md".source = ./claude-md/rules/tdd-guidelines.md;
-
-      # Skills
-      ".claude/skills/claude-code-rules/SKILL.md".source = ./claude-md/skills/claude-code-rules/SKILL.md;
-      ".claude/skills/claude-code-rules/references/rule-format.md".source = ./claude-md/skills/claude-code-rules/references/rule-format.md;
-
-      ".claude/skills/playwright-cli/SKILL.md".source = ./claude-md/skills/playwright-cli/SKILL.md;
-      ".claude/skills/playwright-cli/references/request-mocking.md".source = ./claude-md/skills/playwright-cli/references/request-mocking.md;
-      ".claude/skills/playwright-cli/references/running-code.md".source = ./claude-md/skills/playwright-cli/references/running-code.md;
-      ".claude/skills/playwright-cli/references/session-management.md".source = ./claude-md/skills/playwright-cli/references/session-management.md;
-      ".claude/skills/playwright-cli/references/storage-state.md".source = ./claude-md/skills/playwright-cli/references/storage-state.md;
-      ".claude/skills/playwright-cli/references/test-generation.md".source = ./claude-md/skills/playwright-cli/references/test-generation.md;
-      ".claude/skills/playwright-cli/references/tracing.md".source = ./claude-md/skills/playwright-cli/references/tracing.md;
-      ".claude/skills/playwright-cli/references/video-recording.md".source = ./claude-md/skills/playwright-cli/references/video-recording.md;
-
-      ".claude/skills/tuning/SKILL.md".source = ./claude-md/skills/tuning/SKILL.md;
-      ".claude/skills/tuning/references/config-hierarchy.md".source = ./claude-md/skills/tuning/references/config-hierarchy.md;
-
-      ".claude/skills/repo-kickoff/SKILL.md".source = ./claude-md/skills/repo-kickoff/SKILL.md;
-      ".claude/skills/repo-kickoff/references/interview-questions.md".source = ./claude-md/skills/repo-kickoff/references/interview-questions.md;
-      ".claude/skills/repo-kickoff/references/output-templates.md".source = ./claude-md/skills/repo-kickoff/references/output-templates.md;
-
-      ".claude/skills/decision-council/SKILL.md".source = ./claude-md/skills/decision-council/SKILL.md;
-      ".claude/skills/decision-council/references/role-definitions.md".source = ./claude-md/skills/decision-council/references/role-definitions.md;
-      ".claude/skills/decision-council/references/decision-mechanics.md".source = ./claude-md/skills/decision-council/references/decision-mechanics.md;
 
       ".claude/settings.json".text = builtins.toJSON {
         enabledPlugins = {
@@ -77,10 +52,15 @@ in
           "greptile@claude-plugins-official" = true;
           "document-skills@anthropic-agent-skills" = true;
           "figma-implementation-core@sapuri-agent-plugins" = true;
+          "yutaura-toolkit@yutaura-marketplace" = true;
         } // config._claude.extraPlugins;
         env = {
           CLAUDE_CODE_DISABLE_AUTO_MEMORY = "1";
           DISABLE_AUTOUPDATER = "1";
+          # DISABLE_AUTOUPDATER=1 だけだと plugin の auto-update も止まるため、
+          # plugin だけは更新を受け取りたいので FORCE_AUTOUPDATE_PLUGINS で復活させる。
+          # 個別 marketplace の auto-update on/off は /plugin UI で別途 toggle する必要あり。
+          FORCE_AUTOUPDATE_PLUGINS = "1";
           CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
           CLAUDE_CODE_NO_FLICKER = "1";
           # CLAUDE_CODE_USE_BEDROCK = "1";
@@ -98,6 +78,6 @@ in
         language = "日本語";
         feedbackSurveyRate = 0;
       };
-    } // gwsSkills.skillFiles;
+    } // gwsSkills.skillFiles // yutauraRules.ruleFiles;
   };
 }
