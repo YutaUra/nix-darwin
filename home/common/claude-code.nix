@@ -76,22 +76,30 @@ in
   config = {
     home.packages = [ playwright-cli ];
 
-    home.file = {
-      ".claude/CLAUDE.md".source = ./claude-md/CLAUDE.md;
-    } // gwsSkills.skillFiles // yutauraRules.ruleFiles;
+    # ~/.claude と ~/.claude-private の双方に同一内容を配置する理由:
+    # 個人アカウント用の設定ディレクトリを CLAUDE_CONFIG_DIR=~/.claude-private で
+    # 切り替えて使うため、ルール・プラグイン定義など宣言的に管理したいファイルは
+    # 両方に展開する必要がある。一方で credentials やプロジェクト履歴などの
+    # 動的データは home-manager 管理外のため自然にディレクトリごとに分離される。
+    home.file =
+      let
+        # ベース定義（".claude/" prefix なし）。これを各 root に展開する。
+        baseFiles = {
+          "CLAUDE.md".source = ./claude-md/CLAUDE.md;
+          "settings.json".source = settingsJson;
+        }
+        # gwsSkills / yutauraRules の attrset から ".claude/" prefix を剥がす
+        // (lib.mapAttrs' (n: v:
+              lib.nameValuePair (lib.removePrefix ".claude/" n) v
+            ) gwsSkills.skillFiles)
+        // (lib.mapAttrs' (n: v:
+              lib.nameValuePair (lib.removePrefix ".claude/" n) v
+            ) yutauraRules.ruleFiles);
 
-    # settings.json を symlink ではなくコピーで配置する理由:
-    # cctx (Claude Code context manager) は ~/.claude/settings.json を直接書き換える。
-    # home.file は Nix store への read-only symlink を作るため cctx の write が
-    # 失敗する。よって activation 時に「ファイルが存在しない場合のみ」コピーし、
-    # 以降は cctx の管理に委ねる。Nix 側で設定を更新したい場合は当該ファイルを
-    # 手動削除して home-manager switch を再実行する。
-    home.activation.installClaudeSettings = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-      claudeSettings="${config.home.homeDirectory}/.claude/settings.json"
-      if [[ ! -e "$claudeSettings" && ! -L "$claudeSettings" ]]; then
-        run mkdir -p "${config.home.homeDirectory}/.claude"
-        run install -m 644 ${settingsJson} "$claudeSettings"
-      fi
-    '';
+        withRoot = root: lib.mapAttrs' (n: v:
+          lib.nameValuePair "${root}/${n}" v
+        ) baseFiles;
+      in
+        withRoot ".claude" // withRoot ".claude-private";
   };
 }

@@ -88,7 +88,6 @@ in
     gati
 
     # 開発ツール
-    cctx
     claude-code
     google-cloud-sdk
 
@@ -103,6 +102,11 @@ in
     ruby
     python3
   ];
+
+  # ~/.claude-private を別アカウント用 Claude Code 設定ディレクトリとして使う。
+  # rules / settings.json は home/common/claude-code.nix で両方に展開済み。
+  programs.zsh.shellAliases.claude-private =
+    "CLAUDE_CONFIG_DIR=~/.claude-private command claude";
 
   # install スクリプトを最新版に同期
   home.activation.deployInstallScript = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

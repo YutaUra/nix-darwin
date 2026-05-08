@@ -25,10 +25,12 @@ in
 
     # Microsoft 365
     m365-cli
-
-    # Claude Code 補助ツール
-    cctx
   ];
+
+  # ~/.claude-private を別アカウント用 Claude Code 設定ディレクトリとして使う。
+  # rules / settings.json は home/common/claude-code.nix で両方に展開済み。
+  programs.zsh.shellAliases.claude-private =
+    "CLAUDE_CONFIG_DIR=~/.claude-private command claude";
 
   _claude.extraPlugins = {
     "yutaura-tools@sapuri-agent-plugins" = true;
