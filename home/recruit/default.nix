@@ -25,6 +25,9 @@ in
 
     # Microsoft 365
     m365-cli
+
+    # Claude Code 補助ツール
+    cctx
   ];
 
   _claude.extraPlugins = {

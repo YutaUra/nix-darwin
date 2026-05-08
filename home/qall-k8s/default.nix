@@ -88,6 +88,7 @@ in
     gati
 
     # 開発ツール
+    cctx
     claude-code
     google-cloud-sdk
 

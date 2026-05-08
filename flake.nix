@@ -20,7 +20,7 @@
           inherit system;
           specialArgs = { inherit username configName; };
           modules = [
-            { nixpkgs.overlays = [ (import ./overlays/claude-code.nix) (import ./overlays/gws.nix) (final: _: { gati = inputs.gati.packages.${final.system}.default; zyouz = inputs.zyouz.packages.${final.system}.default; }) ]; }
+            { nixpkgs.overlays = [ (import ./overlays/claude-code.nix) (import ./overlays/gws.nix) (import ./overlays/cctx.nix) (final: _: { gati = inputs.gati.packages.${final.system}.default; zyouz = inputs.zyouz.packages.${final.system}.default; }) ]; }
             ./hosts/${hostname}/default.nix
             nix-homebrew.darwinModules.nix-homebrew
             {
@@ -68,6 +68,7 @@
           overlays = [
             (import ./overlays/claude-code.nix)
             (import ./overlays/gws.nix)
+            (import ./overlays/cctx.nix)
             # コンテナ環境では TTY がなく gati のテストが失敗するため doCheck を無効化
             (final: _: { gati = inputs.gati.packages.${final.system}.default.overrideAttrs { doCheck = false; }; zyouz = inputs.zyouz.packages.${final.system}.default; })
           ];
