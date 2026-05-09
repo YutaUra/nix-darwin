@@ -8,6 +8,14 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+    # brew 5.1.7 では cask の `depends_on macos: {}` パースで `nil.to_sym` クラッシュが発生する。
+    # 5.1.10 で修正済み (Homebrew/brew@1c8cbf3) のため brew-src を直接 override する。
+    # nix-homebrew 上流が 5.1.7 ピンのままなので、flake update では追従できない。
+    brew-src = {
+      url = "github:Homebrew/brew/5.1.10";
+      flake = false;
+    };
+    nix-homebrew.inputs.brew-src.follows = "brew-src";
     gati.url = "github:YutaUra/gati";
     zyouz.url = "github:YutaUra/zyouz";
   };
