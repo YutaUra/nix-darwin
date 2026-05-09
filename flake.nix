@@ -64,6 +64,14 @@
         profile = "private";
       };
 
+      # 新しい Mac でユーザー名を `yuta` で作成したマシン用。
+      # hosts/profiles は private と共通で、home-manager に渡す username だけ差し替え。
+      darwinConfigurations."yuta" = mkDarwin {
+        hostname = "private";
+        username = "yuta";
+        profile = "private";
+      };
+
       darwinConfigurations."recruit" = mkDarwin {
         hostname = "recruit";
         username = "01051961";
