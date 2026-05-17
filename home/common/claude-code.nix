@@ -50,11 +50,15 @@ let
     };
     permissions = {
       allow = basePermissions ++ config._claude.extraPermissions;
+      defaultMode = "auto";
     };
+    # auto mode 有効化時の opt-in dialog を抑制する。
+    # 一度 "Yes, and make it my default mode" を選んだ場合に Claude が自動で書き込む値だが、
+    # ここで宣言的に true にしておくことで dialog 表示自体をスキップできる。
+    skipAutoPermissionPrompt = true;
     model = "opus";
     effortLevel = "high";
     autoMemoryEnabled = false;
-    defaultMode = "auto";
     language = "日本語";
     feedbackSurveyRate = 0;
   });
