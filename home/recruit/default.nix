@@ -5,6 +5,9 @@ let
   m365-cli = pkgs.writeShellScriptBin "m365" ''
     exec ${pkgs.lib.getExe pkgs.nodejs} ${pkgs.lib.getExe' pkgs.nodejs "npx"} --yes --package @pnp/cli-microsoft365@latest m365 "$@"
   '';
+  deploygate-cli = pkgs.writeShellScriptBin "deploygate" ''
+    exec ${pkgs.lib.getExe pkgs.nodejs} ${pkgs.lib.getExe' pkgs.nodejs "npx"} --yes --package deploygate@latest deploygate "$@"
+  '';
 in
 {
   imports = [
@@ -25,6 +28,9 @@ in
 
     # Microsoft 365
     m365-cli
+
+    # DeployGate
+    deploygate-cli
   ];
 
   # ~/.claude-private を別アカウント用 Claude Code 設定ディレクトリとして使う。
