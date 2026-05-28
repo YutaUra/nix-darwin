@@ -127,15 +127,23 @@ in
         # Kitty キーボードプロトコルは独自のスタック機構のため別途 pop。
         local RESET_TERM="''${ESC}[!p''${ESC}[<u''${ESC}[<u''${ESC}[<u''${ESC}[<u''${ESC}[<u"
 
+        # Ghostty の xterm-ghostty terminfo を Pod 側に持たない理由で
+        # TERM を上書きする:
+        # Pod の base image には xterm-ghostty terminfo が無く、
+        # kubectl exec -it 経由でそのまま伝播すると Pod 側の tmux が
+        # outer terminal の能力を読めず、罫線を ASCII (`_` 等) に
+        # フォールバックして claude code の表示が崩れる。
+        # exec 用途では Ghostty 固有機能 (kitty keyboard protocol 等) は
+        # 不要なので、汎用の xterm-256color に倒して伝播させる。
         if [[ -n "$color" ]]; then
           local SET_BG="''${ESC}]11;''${color}''${BEL}"
           printf '%s' "$SET_BG"
           trap 'printf "%s" "''${RESET_TERM}''${RESET_BG}"' EXIT INT TERM
-          command kubectl "''${new_args[@]}"
+          TERM=xterm-256color command kubectl "''${new_args[@]}"
           printf '%s' "''${RESET_TERM}''${RESET_BG}"
           trap - EXIT INT TERM
         else
-          command kubectl "''${new_args[@]}"
+          TERM=xterm-256color command kubectl "''${new_args[@]}"
           printf '%s' "$RESET_TERM"
         fi
       else
