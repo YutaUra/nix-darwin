@@ -86,6 +86,7 @@ in
     duckdb
     gh
     gati
+    tmux
 
     # 開発ツール
     claude-code
