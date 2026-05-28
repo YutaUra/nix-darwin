@@ -47,6 +47,14 @@ in
   home.sessionVariables = {
     # コンテナ環境で未設定の場合があるため明示的に設定
     USER = "quipper";
+
+    # LANG/LC_ALL を C.UTF-8 にしない場合、Node 系 TUI ライブラリ
+    # (Ink / cli-boxes 等) の is-unicode-supported が false を返し、
+    # claude code の罫線が ASCII にフォールバックして `_` 混じりに崩れる。
+    # en_US.UTF-8 を選ばない理由: locale-gen が必要なイメージがあり、
+    # C.UTF-8 は glibc/musl ともに生成不要で使える。
+    LANG = "C.UTF-8";
+    LC_ALL = "C.UTF-8";
   };
 
   programs.zsh.initContent = ''
