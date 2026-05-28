@@ -25,6 +25,7 @@ in
     ../common/git.nix
     ../common/claude-code.nix
     ../common/zellij.nix
+    ../common/tmux.nix
     ../common/yazi.nix
     ../common/direnv.nix
   ];
@@ -94,7 +95,6 @@ in
     duckdb
     gh
     gati
-    tmux
 
     # 開発ツール
     claude-code
