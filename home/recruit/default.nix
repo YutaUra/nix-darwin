@@ -111,10 +111,24 @@ in
           esac
         fi
 
-        # "-- zsh" を "-- bash -lc zsh" に変換（コンテナの PATH に zsh がない場合の対策）
+        # "-- " 以降を加工する処理:
+        # 1. "-- zsh" を "-- bash -lc zsh" に変換
+        #    (コンテナの PATH に zsh がない場合の対策)
+        # 2. "--" の直後に "env LANG=C.UTF-8 LC_ALL=C.UTF-8" を注入
+        #    (Pod の container default は LANG 未設定。tmux server が
+        #    起動時の locale 検出で UTF-8 と判断できず non-UTF-8 mode
+        #    で動くと、CJK や `★` 等の multi-byte を `_` に置換する。
+        #    shell init 経由なら home.sessionVariables で立つが、
+        #    kubectl exec -- tmux のように shell を経由しない経路では
+        #    届かないため、kubectl exec の引数として env を明示する。)
         local new_args=()
         local found_dashdash=false
+        local injected_env=false
         for arg in "''${args[@]}"; do
+          if [[ "$found_dashdash" == true && "$injected_env" == false ]]; then
+            new_args+=("env" "LANG=C.UTF-8" "LC_ALL=C.UTF-8")
+            injected_env=true
+          fi
           if [[ "$found_dashdash" == true && "$arg" == "zsh" ]]; then
             new_args+=("bash" "-lc" "zsh")
           else
