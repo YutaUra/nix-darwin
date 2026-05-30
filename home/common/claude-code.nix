@@ -57,7 +57,12 @@ let
     # 一度 "Yes, and make it my default mode" を選んだ場合に Claude が自動で書き込む値だが、
     # ここで宣言的に true にしておくことで dialog 表示自体をスキップできる。
     skipAutoPermissionPrompt = true;
-    model = "opus";
+    # "opus" エイリアスを使わない理由:
+    # Claude Code 独自エイリアスで最新 Opus に自動追従するが、実際に解決される
+    # モデル ID が CLI 側の更新タイミングに依存し不透明。
+    # 公式 docs (docs.claude.com) でも 4.6 世代以降のモデル ID は pinned snapshot と
+    # 明記されているため、宣言的設定では具体的な ID を直接指定する。
+    model = "claude-opus-4-8";
     effortLevel = "high";
     autoMemoryEnabled = false;
     language = "日本語";
