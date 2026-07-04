@@ -1,3 +1,5 @@
-{ ... }: {
-  # private 固有の home.packages
+{ pkgs, ... }: {
+  home.packages = with pkgs; [
+    vhs
+  ];
 }
