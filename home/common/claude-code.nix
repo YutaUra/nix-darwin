@@ -16,7 +16,7 @@ let
     "mcp__plugin_context7_context7__query-docs"
   ];
 
-  settingsJson = pkgs.writeText "claude-settings.json" (builtins.toJSON {
+  settingsJson = pkgs.writeText "claude-settings.json" (builtins.toJSON ({
     enabledPlugins = {
       "figma@claude-plugins-official" = true;
       "code-review@claude-plugins-official" = true;
@@ -67,7 +67,9 @@ let
     autoMemoryEnabled = false;
     language = "日本語";
     feedbackSurveyRate = 0;
-  });
+  } // lib.optionalAttrs (config._claude.extraHooks != {}) {
+    hooks = config._claude.extraHooks;
+  }));
 in
 {
   options._claude = {
@@ -80,6 +82,11 @@ in
       type = lib.types.attrsOf lib.types.bool;
       default = {};
       description = "プロファイル固有の Claude Code プラグイン";
+    };
+    extraHooks = lib.mkOption {
+      type = lib.types.attrs;
+      default = {};
+      description = "プロファイル固有の Claude Code hooks（settings.json の hooks に merge される）";
     };
   };
 
