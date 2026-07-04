@@ -18,6 +18,10 @@
     nix-homebrew.inputs.brew-src.follows = "brew-src";
     gati.url = "github:YutaUra/gati";
     zyouz.url = "github:YutaUra/zyouz";
+    # herdr は nixpkgs を nixos-unstable にピンしているが follows 未宣言のため、
+    # こちらから追従させて nixpkgs の二重取り込みを防ぐ（単体バイナリなので安全）。
+    herdr.url = "github:ogulcancelik/herdr";
+    herdr.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, nix-homebrew, zyouz, ... }:
@@ -28,7 +32,7 @@
           inherit system;
           specialArgs = { inherit username configName; };
           modules = [
-            { nixpkgs.overlays = [ (import ./overlays/claude-code.nix) (import ./overlays/gws.nix) (final: _: { gati = inputs.gati.packages.${final.system}.default; zyouz = inputs.zyouz.packages.${final.system}.default; }) ]; }
+            { nixpkgs.overlays = [ (import ./overlays/claude-code.nix) (import ./overlays/gws.nix) (final: _: { gati = inputs.gati.packages.${final.system}.default; zyouz = inputs.zyouz.packages.${final.system}.default; herdr = inputs.herdr.packages.${final.system}.default; }) ]; }
             ./hosts/${hostname}/default.nix
             nix-homebrew.darwinModules.nix-homebrew
             {
