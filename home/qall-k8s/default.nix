@@ -28,6 +28,7 @@ in
     ../common/tmux.nix
     ../common/yazi.nix
     ../common/direnv.nix
+    ../common/herdr.nix
   ];
 
   # zsh パッケージをラッパー版に置き換え

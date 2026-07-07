@@ -8,6 +8,7 @@
     ./direnv.nix
     ./zellij.nix
     ./zyouz.nix
+    ./herdr.nix
   ];
 
   home.stateVersion = "24.11";
