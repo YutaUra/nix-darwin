@@ -29,7 +29,6 @@ let
       "security-guidance@claude-plugins-official" = true;
       "explanatory-output-style@claude-plugins-official" = true;
       "ralph-loop@claude-plugins-official" = true;
-      "learning-output-style@claude-plugins-official" = true;
       "greptile@claude-plugins-official" = true;
       "document-skills@anthropic-agent-skills" = true;
       "figma-implementation-core@sapuri-agent-plugins" = true;
