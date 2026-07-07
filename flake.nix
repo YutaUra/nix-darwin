@@ -89,7 +89,7 @@
             (import ./overlays/claude-code.nix)
             (import ./overlays/gws.nix)
             # コンテナ環境では TTY がなく gati のテストが失敗するため doCheck を無効化
-            (final: _: { gati = inputs.gati.packages.${final.system}.default.overrideAttrs { doCheck = false; }; zyouz = inputs.zyouz.packages.${final.system}.default; })
+            (final: _: { gati = inputs.gati.packages.${final.system}.default.overrideAttrs { doCheck = false; }; zyouz = inputs.zyouz.packages.${final.system}.default; herdr = inputs.herdr.packages.${final.system}.default; })
           ];
         };
         modules = [

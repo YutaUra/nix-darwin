@@ -96,6 +96,9 @@ in
     gh
     gati
 
+    # AI コーディングエージェント用のターミナルマルチプレクサ
+    herdr
+
     # 開発ツール
     claude-code
     google-cloud-sdk

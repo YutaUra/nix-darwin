@@ -15,6 +15,9 @@ in
   ];
 
   home.packages = with pkgs; [
+    # AI コーディングエージェント用のターミナルマルチプレクサ
+    herdr
+
     # Kubernetes
     kubectl
     stern
