@@ -55,6 +55,21 @@
     pkgs.plemoljp-nf
   ];
 
+  # nixpkgs-unstable の nixos-render-docs が --toc-depth を削除したが、
+  # nix-darwin(master) がまだ --toc-depth を渡すコードのままで、マニュアル生成が
+  # `--toc-depth has been removed` で失敗し switch 全体がブロックされる。
+  # nix-darwin が --sidebar-depth へ追従するまでの一時的な回避として、
+  # マニュアルを生成する2経路の両方を無効化する。
+  #
+  # (1) 本システムの darwin-manual-html/darwin-help 生成を止める。
+  documentation.enable = false;
+  # (2) darwin-uninstaller は eval-config.nix でデフォルト設定の nix-darwin を
+  #     内部で丸ごと再評価して同梱するため、上の documentation.enable=false が
+  #     届かず、その nested eval が documentation.enable=true のままマニュアルを
+  #     生成して同じエラーで落ちる。uninstaller の同梱自体を外して経路を断つ。
+  #     失うのは nix-darwin 自体を消す darwin-uninstaller コマンドのみ。
+  system.tools.darwin-uninstaller.enable = false;
+
   # Touch ID で sudo 認証
   security.pam.services.sudo_local.touchIdAuth = true;
 
