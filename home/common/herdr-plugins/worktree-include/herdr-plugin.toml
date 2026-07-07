@@ -1,0 +1,10 @@
+id = "yutaura.worktree-include"
+name = "Worktree Include"
+version = "0.1.0"
+min_herdr_version = "0.7.0"
+description = "worktree 作成時に各リポジトリの .worktreeinclude に列挙された git-ignore 済みファイルを元リポジトリからコピーする"
+platforms = ["linux", "macos"]
+
+[[events]]
+on = "worktree.created"
+command = ["bash", "copy-worktree-includes.sh"]
