@@ -57,7 +57,7 @@
           inherit system;
           specialArgs = { inherit username configName; };
           modules = [
-            { nixpkgs.overlays = [ (import ./overlays/claude-code.nix) (import ./overlays/gws.nix) (final: _: { gati = inputs.gati.packages.${final.system}.default; zyouz = inputs.zyouz.packages.${final.system}.default; herdr = inputs.herdr.packages.${final.system}.default; }) ]; }
+            { nixpkgs.overlays = [ (import ./overlays/claude-code.nix) (import ./overlays/gws.nix) (import ./overlays/github-runner.nix) (final: _: { gati = inputs.gati.packages.${final.system}.default; zyouz = inputs.zyouz.packages.${final.system}.default; herdr = inputs.herdr.packages.${final.system}.default; }) ]; }
             ./hosts/${hostname}/default.nix
             nix-homebrew.darwinModules.nix-homebrew
             {
