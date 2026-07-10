@@ -8,11 +8,15 @@
     # bootstrap ツールで、ベンダ署名済みの brew リリース版の方が Keychain 識別子が安定し
     # Apple/Xcode 仕様変更にも自動追従する（core 2.0.3 で nixpkgs 1.6.2 より新しい）。
     # CI のホットパスではない（ジョブは installed Xcode の xcodebuild を使う）ため
-    # nix の再現性 pin の利得は小さい。aria2 は xcodes の DL 高速化用で、同一 PATH に
-    # 揃える必要があるので brew に合わせる。
+    # nix の再現性 pin の利得は小さい。
+    #
+    # aria2 を入れない理由:
+    # この Mac では aria2 が持ち込む OpenSSL の信頼ストアが正規の Sectigo チェーンを
+    # 検証できず（openssl@3 の既定 cert.pem 不在＋system keychain 取り込みが不完全）、
+    # 全 HTTPS DL が TLS で落ちる。xcodes は --no-aria2 の native downloader
+    # (Secure Transport) で確実に通るため、常に失敗する aria2 は宣言しない。
     brews = [
       "xcodes"
-      "aria2"
     ];
 
     casks = [
