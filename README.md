@@ -192,6 +192,7 @@ home/
     claude-code.nix   #   Claude Code 設定
   private/            # private 固有の home-manager 設定（拡張枠）
   recruit/            # recruit 固有の home-manager 設定（Git 追加設定等）
+  _ghrunner/          # self-hosted GitHub Actions runner ユーザーの home（private に同居）
   qall-k8s/           # K8s 開発コンテナ用（aarch64-linux）
 ```
 

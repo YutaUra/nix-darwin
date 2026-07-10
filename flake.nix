@@ -26,7 +26,32 @@
 
   outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, nix-homebrew, zyouz, ... }:
     let
-      mkDarwin = { hostname, username, profile, system ? "aarch64-darwin" }:
+      # macOS self-hosted GitHub Actions runner 用のサービスユーザー _ghrunner を
+      # 宣言的に作成し、その home 環境を home-manager で管理する再利用モジュール。
+      # 複数マシンで同じ runner ユーザーを用意できるよう、mkDarwin の extraModules に
+      # 渡して opt-in する（recruit のような runner 不要なホストには入れない）。
+      ghrunner = {
+        # nix-darwin にこのユーザーの作成・管理を許可する（未列挙のユーザーは触らない安全弁）。
+        users.knownUsers = [ "_ghrunner" ];
+        users.users._ghrunner = {
+          # uid 502 は macOS の通常ユーザー(501=管理者)の次に割り当てられる番号。
+          # 既存マシンで手動作成済みの _ghrunner と一致させ、activation での uid 変更衝突を避ける。
+          uid = 502;
+          gid = 20; # staff（通常ユーザーと同じプライマリグループ）
+          home = "/Users/_ghrunner";
+          createHome = true; # 新規マシンではホームを自動作成する
+          isHidden = true; # サービスアカウントなのでログイン画面には出さない
+          shell = "/bin/zsh";
+          description = "GitHub Runner";
+        };
+        home-manager.users._ghrunner = {
+          imports = [ ./home/_ghrunner/default.nix ];
+          home.username = "_ghrunner";
+          home.homeDirectory = "/Users/_ghrunner";
+        };
+      };
+
+      mkDarwin = { hostname, username, profile, extraModules ? [ ], system ? "aarch64-darwin" }:
         let configName = profile; in
         nix-darwin.lib.darwinSystem {
           inherit system;
@@ -58,7 +83,7 @@
                 home.homeDirectory = "/Users/${username}";
               };
             }
-          ];
+          ] ++ extraModules;
         };
     in
     {
@@ -66,6 +91,8 @@
         hostname = "private";
         username = "yutaura";
         profile = "private";
+        # 個人マシンを self-hosted GitHub Actions runner としても使うため _ghrunner を同居させる。
+        extraModules = [ ghrunner ];
       };
 
       darwinConfigurations."recruit" = mkDarwin {
