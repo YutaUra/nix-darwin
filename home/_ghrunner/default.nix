@@ -16,6 +16,19 @@
 
   home.stateVersion = "24.11";
 
+  # runner のロケールを UTF-8 に固定する。
+  # macOS は Terminal.app 以外の起動経路(sudo -i / launchd / SSH)では LANG を export せず、
+  # その場合 locale が C(POSIX/ASCII) にフォールバックして UTF-8 の multibyte を壊す。
+  # CI が起動経路で挙動を変えないよう、login shell で LANG を明示する。
+  # ja_JP.UTF-8 ではなく en_US.UTF-8 を使う理由: 地域依存の書式(日付/数値/ソート)を避け、
+  # ctype のみ UTF-8 にするため。LC_ALL は設定しない(ツール側の個別上書きを潰さない)。
+  #
+  # なお login shell 経由での起動を前提とした固定である点に注意。
+  # 将来 launchd 常駐へ切り替える場合は launchd の EnvironmentVariables 側で LANG を渡す必要がある。
+  home.sessionVariables = {
+    LANG = "en_US.UTF-8";
+  };
+
   home.packages = with pkgs; [
     # GitHub Actions self-hosted runner 本体（config.sh / run.sh / Runner.Listener）。
     # nixpkgs 版は self-update を無効化するパッチ済みで、read-only な Nix store から
