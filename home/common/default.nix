@@ -40,6 +40,8 @@
 
     # ランタイム
     nodejs_22
+    # herdr の hunk プラグインが `bunx hunkdiff` で hunk バイナリを解決するため
+    bun
     # doInstallCheck = false: nixpkgs upstream の Disable.test.ts が失敗するため一時的にテストをスキップ
     (corepack.overrideAttrs (old: { doInstallCheck = false; meta = old.meta // { priority = 0; }; }))
 

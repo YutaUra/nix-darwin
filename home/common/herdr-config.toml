@@ -1,0 +1,31 @@
+# herdr configuration
+#
+# home-manager (nix-darwin) が管理する。編集はこのファイル
+# (home/common/herdr-config.toml) で行い、darwin-rebuild switch で反映する。
+# 反映後は `herdr server reload-config`、または herdr の再起動で読み込まれる。
+#
+# 注意: このファイルは nix store への read-only symlink として配置されるため、
+# `herdr config reset-keys` 等の herdr 側からの書き込みは効かない。
+# キーバインドの管理は nix 側に一元化する、という宣言。
+
+[keys]
+# プレフィックスキーは既定の ctrl+b のまま（明示不要）。
+# 既定バインドと衝突しないキーを custom command に割り当てる。
+
+# hunk プラグイン: 未コミットの作業ツリー差分を split ペインで開く（"d" = diff）。
+# アクション自体が split の作成と hunkdiff 実行までを行うため、事前の手動分割は不要。
+[[keys.command]]
+key = "prefix+d"
+type = "shell"
+command = "herdr plugin action invoke worktree-split --plugin hunk.diff"
+
+# 他モードも使うなら以下を有効化する（衝突しないキーを選ぶこと）:
+# [[keys.command]]
+# key = "prefix+shift+d"   # 既定では close_workspace に割当のため変更が必要
+# type = "shell"
+# command = "herdr plugin action invoke staged-split --plugin hunk.diff"
+#
+# [[keys.command]]
+# key = "prefix+alt+d"
+# type = "shell"
+# command = "herdr plugin action invoke branch-split --plugin hunk.diff"

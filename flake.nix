@@ -22,6 +22,14 @@
     # こちらから追従させて nixpkgs の二重取り込みを防ぐ（単体バイナリなので安全）。
     herdr.url = "github:ogulcancelik/herdr";
     herdr.inputs.nixpkgs.follows = "nixpkgs";
+    # herdr の hunk プラグイン本体。flake ではなくソースツリーとして取り込み、
+    # herdr.nix から store パスを `herdr plugin link` で登録する。
+    # flake.lock でバージョン固定できるよう input 化する（既存の worktree-include は
+    # in-repo なので link のみだが、こちらはリモートのため input で追従させる）。
+    herdr-plugin-hunk = {
+      url = "github:edmundmiller/herdr-plugin-hunk";
+      flake = false;
+    };
   };
 
   outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, nix-homebrew, zyouz, ... }:
@@ -72,7 +80,7 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.backupFileExtension = "before-nix";
-              home-manager.extraSpecialArgs = { inherit username; };
+              home-manager.extraSpecialArgs = { inherit username; inherit (inputs) herdr-plugin-hunk; };
               home-manager.users.${username} = {
                 imports = [
                   zyouz.homeManagerModules.default
@@ -111,6 +119,7 @@
             (final: _: { gati = inputs.gati.packages.${final.system}.default.overrideAttrs { doCheck = false; }; zyouz = inputs.zyouz.packages.${final.system}.default; herdr = inputs.herdr.packages.${final.system}.default; })
           ];
         };
+        extraSpecialArgs = { inherit (inputs) herdr-plugin-hunk; };
         modules = [
           zyouz.homeManagerModules.default
           ./home/qall-k8s/default.nix
