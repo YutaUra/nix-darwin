@@ -47,8 +47,16 @@
       AppleInterfaceStyle = "Dark";
       ApplePressAndHoldEnabled = false;
       AppleEnableSwipeNavigateWithScrolls = false;
-      # 入力中に薄いグレーで先読み候補が出るライブ予測変換を無効化
-      NSAutomaticInlinePredictionEnabled = false;
+    };
+
+    # ことえり（日本語入力）のライブ変換を無効化。
+    # 変換キーを押さず入力中に自動で漢字変換される挙動が好みに合わないため。
+    # JIMPrefLiveConversionKey はことえり独自ドメインのキーで NSGlobalDomain の
+    # 型付きオプションには無いため CustomUserPreferences で直接書き込む。
+    CustomUserPreferences = {
+      "com.apple.inputmethod.Kotoeri" = {
+        JIMPrefLiveConversionKey = false;
+      };
     };
   };
 
