@@ -9,6 +9,15 @@ let
     exec ${pkgs.lib.getExe pkgs.nodejs} ${pkgs.lib.getExe' pkgs.nodejs "npx"} --yes @playwright/cli@latest "$@"
   '';
 
+  # ~/.claude へコピーせず nix store の実行ファイルとして持つ理由:
+  # 公式サンプルは cp + chmod +x を案内しているが、それだと更新が手作業になる。
+  # writeScriptBin なら python3 の解決もシェバンに焼き込まれ、statusLine から
+  # 絶対パスで参照できるため宣言的に完結する。
+  runcat-statusline = pkgs.writeScriptBin "runcat-statusline" ''
+    #!${pkgs.python3}/bin/python3
+    ${builtins.readFile ./runcat-statusline.py}
+  '';
+
   basePermissions = [
     "WebSearch"
     "Bash(playwright-cli:*)"
@@ -77,6 +86,12 @@ let
     # モデル ID が CLI 側の更新タイミングに依存し不透明。
     # 公式 docs (docs.claude.com) でも 4.6 世代以降のモデル ID は pinned snapshot と
     # 明記されているため、宣言的設定では具体的な ID を直接指定する。
+    # 出力先 JSON は常に ~/.claude/runcat-usage.json 固定なので、
+    # .claude-private 側で動かしても RunCat Neo の参照先は 1 つで済む。
+    statusLine = {
+      type = "command";
+      command = lib.getExe' runcat-statusline "runcat-statusline";
+    };
     model = "claude-fable-5";
     effortLevel = "low";
     autoMemoryEnabled = false;
