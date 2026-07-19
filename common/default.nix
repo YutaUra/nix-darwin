@@ -47,6 +47,8 @@
       AppleInterfaceStyle = "Dark";
       ApplePressAndHoldEnabled = false;
       AppleEnableSwipeNavigateWithScrolls = false;
+      # 入力中に薄いグレーで先読み候補が出るライブ予測変換を無効化
+      NSAutomaticInlinePredictionEnabled = false;
     };
   };
 
