@@ -6,6 +6,7 @@
     ./ghostty.nix
     ./claude-code.nix
     ./direnv.nix
+    ./lazygit.nix
     ./zellij.nix
     ./zyouz.nix
     ./herdr.nix
