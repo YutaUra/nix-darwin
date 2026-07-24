@@ -34,6 +34,12 @@ in
   # zsh パッケージをラッパー版に置き換え
   programs.zsh.package = zshWrapped;
 
+  # monorepo での git status 高速化
+  programs.git.settings = {
+    core.untrackedcache = true;
+    core.fsmonitor = true;
+  };
+
   _claude.extraPermissions = [
     "Read(//quipper/monorepo/**)"
     "Edit(//quipper/monorepo/**)"
