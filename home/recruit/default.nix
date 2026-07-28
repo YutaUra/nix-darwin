@@ -49,9 +49,18 @@ in
     executable = true;
     text = ''
       #!/bin/zsh
+      # 接続先 pod を第1引数で選択する（省略時は manage-web）
+      case "''${1:-manage-web}" in
+        manage-web)  pod="pod/manage-web-0" ;;
+        aya-payment) pod="pod/aya-payment-0" ;;
+        *)
+          echo "usage: claude-k8s [manage-web|aya-payment]" >&2
+          exit 1
+          ;;
+      esac
       # TERM/LANG の上書き理由は programs.zsh.initContent の kubectl 関数を参照
       # （このスクリプトは zsh 関数を継承しないため、ここで再設定する）
-      TERM=xterm-256color kubectl exec -it pod/manage-web-0 -- \
+      TERM=xterm-256color kubectl exec -it "$pod" -- \
         env LANG=C.UTF-8 LC_ALL=C.UTF-8 \
         tmux new -A -s claude 'claude -c'
     '';
