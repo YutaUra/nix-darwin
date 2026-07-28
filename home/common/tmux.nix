@@ -22,6 +22,16 @@
       # true color を有効化（terminfo は tmux-256color のまま）
       set -ga terminal-overrides ",*256col*:Tc"
 
+      # pane 内プログラムの OSC タイトルを外側の端末へ透過する。
+      # tmux はデフォルトで端末タイトルを自分では設定しない（set-titles off）ため、
+      # kubectl exec → tmux → claude の経路では Claude Code のタイトルが
+      # 手元の端末（= herdr の検出対象）まで届かない。
+      # set-titles-string をデフォルト（#S:#I:#W 等のフォーマット）のままにしない理由:
+      # herdr のエージェント状態判定はタイトル先頭のスピナー文字への
+      # パターンマッチなので、pane タイトルを無加工で流す必要がある。
+      set -g set-titles on
+      set -g set-titles-string "#{pane_title}"
+
       # attach 時に他クライアントのサイズに引きずられないよう
       # 各 window をクライアントのサイズに自動追従させる。
       # VPN 切替や別マシンから再 attach する運用で罫線崩れを抑える。

@@ -36,6 +36,28 @@ in
     deploygate-cli
   ];
 
+  # herdr に「この pane は claude」と同定させるための kubectl exec ラッパー。
+  # herdr のエージェント同定は pane の前面プロセスグループに claude という
+  # 名前の実行ファイルがいるかで行われ、OSC タイトルはその後の状態判定にしか
+  # 使われない。kubectl exec 直叩きでは前面が kubectl になり同定されないため、
+  # claude という名前のスクリプトを exec せずに（= 前面プロセスグループに
+  # 残したまま）kubectl を子プロセスとして起動する。
+  # writeShellScriptBin で home.packages に入れない理由:
+  # PATH 上に claude を置くとローカルの claude-code 本体と衝突するため、
+  # PATH 外の固定パス（~/.herdr-shims/claude）に配置し alias 経由で呼ぶ。
+  home.file.".herdr-shims/claude" = {
+    executable = true;
+    text = ''
+      #!/bin/zsh
+      # TERM/LANG の上書き理由は programs.zsh.initContent の kubectl 関数を参照
+      # （このスクリプトは zsh 関数を継承しないため、ここで再設定する）
+      TERM=xterm-256color kubectl exec -it pod/manage-web-0 -- \
+        env LANG=C.UTF-8 LC_ALL=C.UTF-8 \
+        tmux new -A -s claude 'claude -c'
+    '';
+  };
+  programs.zsh.shellAliases.claude-k8s = "~/.herdr-shims/claude";
+
   # ~/.claude-private を別アカウント用 Claude Code 設定ディレクトリとして使う。
   # rules / settings.json は home/common/claude-code.nix で両方に展開済み。
   programs.zsh.shellAliases.claude-private =
