@@ -35,6 +35,54 @@ in
     };
   };
 
+  # Claude Code 起動時に 1Password から秘密を環境変数として注入する。
+  # リポジトリ直下に .env.template（op:// 参照のみを書いたファイル）がある場合のみ発火する。
+  #
+  # 単なる export ではなく op run を挟む理由:
+  #   op run は子プロセスの stdout/stderr をスキャンし、秘密値が現れると
+  #   <concealed by 1Password> へ置換する。これにより秘密が Claude の
+  #   コンテキスト（= Anthropic へ送信されるデータ）に載ることを防ぐ。
+  #   export や direnv ではこのマスキングが効かない。
+  #
+  # env -u OP_SERVICE_ACCOUNT_TOKEN している理由:
+  #   op run は自身の環境変数を子へ継承させるため、そのままだとトークンが
+  #   claude のプロセスに残る。すると claude が op read を直接叩いて vault 全体を
+  #   読めてしまい（= マスキングを迂回できる）op run を挟む意味が失われる。
+  #   exec 直前に剥がすことでこの経路を塞ぐ。
+  #
+  # git ルートで打ち切る理由:
+  #   親を無制限に遡ると ~/.env.template がホーム配下全域で発火し、無関係な
+  #   プロジェクトへ秘密が混入する。秘密はリポジトリ単位で管理する規約を関数側で強制する。
+  #
+  # トークンを Keychain に置く理由:
+  #   ~/.zshrc.local 等で export すると全プロセスの環境に常駐し、上記 env -u が無意味になる。
+  #   平文ファイルも避けたいため、moshi-hook のペアリング token と同じく Keychain に寄せる。
+  programs.zsh.initContent = ''
+    claude() {
+      local root env_file token
+
+      root="$(git rev-parse --show-toplevel 2>/dev/null)"
+      env_file="$root/.env.template"
+
+      if [[ -z "$root" || ! -f "$env_file" ]]; then
+        command claude "$@"
+        return $?
+      fi
+
+      token="$(security find-generic-password -w -s claude-code-op-token 2>/dev/null)"
+      if [[ -z "$token" ]]; then
+        # 秘密なしでも作業自体は続行できるため、失敗させず警告に留める。
+        print -u2 "warning: claude-code-op-token が Keychain に無いため 1Password 注入をスキップします"
+        command claude "$@"
+        return $?
+      fi
+
+      OP_SERVICE_ACCOUNT_TOKEN="$token" \
+        op run --env-file="$env_file" -- \
+        env -u OP_SERVICE_ACCOUNT_TOKEN claude "$@"
+    }
+  '';
+
   # `moshi-hook install` が生成する Claude Code hooks を宣言的に転記する。
   # settings.json は home-manager 管理の read-only symlink のため moshi-hook install は使えない。
   # 各イベントで `moshi-hook claude-hook` を呼び、承認待ちやターン完了を iPhone の Moshi に通知する。
