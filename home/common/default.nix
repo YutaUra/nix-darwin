@@ -30,6 +30,7 @@
     gh
     gws
     google-cloud-sdk
+    zed-editor
 
     # Docker 関連
     colima
