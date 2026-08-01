@@ -16,6 +16,11 @@
 
   home.stateVersion = "24.11";
 
+  # home-manager のマニュアル生成を無効化する（home/common と同じ理由）。
+  # 生成過程の options.json が文脈なしストアパスを含み Nix が warning を出すため。
+  # 無人 runner で man を引くことはないので失うものは無い。
+  manual.manpages.enable = false;
+
   # runner のロケールを UTF-8 に固定する。
   # macOS は Terminal.app 以外の起動経路(sudo -i / launchd / SSH)では LANG を export せず、
   # その場合 locale が C(POSIX/ASCII) にフォールバックして UTF-8 の multibyte を壊す。

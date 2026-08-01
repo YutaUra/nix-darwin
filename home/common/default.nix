@@ -14,6 +14,12 @@
 
   home.stateVersion = "24.11";
 
+  # home-manager のマニュアル（man home-configuration.nix）生成を無効化する。
+  # 生成過程の options.json が builtins.derivation に文脈なしストアパスを埋め込み、
+  # 新しい Nix が「将来動かなくなる可能性がある」と warning を出すため。
+  # man でオプションを引く習慣がなく、失うものが無いので生成ごと止める。
+  manual.manpages.enable = false;
+
   home.packages = with pkgs; [
     # CLI ツール
     fd
