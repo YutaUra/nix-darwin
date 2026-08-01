@@ -18,6 +18,61 @@ in
     moshi-hook
   ];
 
+  # ~/.aws/config を宣言的に管理する（private マシンのみ）。
+  # アカウント ID と SSO スタート URL は AWS 公式見解では秘密情報ではないため
+  # 平文で commit している。認証情報そのもの（SSO トークン等）は
+  # ~/.aws/sso/ 以下に置かれ home-manager 管理外のまま。
+  programs.awscli = {
+    enable = true;
+    settings = {
+      "profile 147997134905" = {
+        sso_session = "147997134905";
+        sso_account_id = "147997134905";
+        sso_role_name = "AdministratorAccess";
+        region = "ap-northeast-1";
+        output = "json";
+      };
+      "sso-session 147997134905" = {
+        sso_start_url = "https://d-95674b959d.awsapps.com/start";
+        sso_region = "ap-northeast-1";
+        sso_registration_scopes = "sso:account:access";
+      };
+      "sso-session irodas" = {
+        sso_start_url = "https://irodas.awsapps.com/start/#";
+        sso_region = "ap-northeast-1";
+        sso_registration_scopes = "sso:account:access";
+      };
+      "profile irodas-bio" = {
+        sso_session = "irodas";
+        sso_account_id = "118107592413";
+        sso_role_name = "AdministratorAccess";
+        region = "ap-northeast-1";
+        output = "json";
+      };
+      "profile irodas-dev" = {
+        sso_session = "irodas";
+        sso_account_id = "362976989817";
+        sso_role_name = "AdministratorAccess";
+        region = "ap-northeast-1";
+        output = "json";
+      };
+      "profile irodas-rpa-stg" = {
+        sso_session = "irodas";
+        sso_account_id = "657498838285";
+        sso_role_name = "StgChutoroAdministratorAccess";
+        region = "ap-northeast-1";
+        output = "json";
+      };
+      "profile irodas-rpa-prod" = {
+        sso_session = "irodas";
+        sso_account_id = "905223169255";
+        sso_role_name = "ProdChutoroAdministratorAccess";
+        region = "ap-northeast-1";
+        output = "json";
+      };
+    };
+  };
+
   # brew services を使わず launchd で moshi-hook デーモン（Unix socket + Moshi への WebSocket bridge）を常駐させる。
   # brew services の代替として宣言的に管理することで、インストールから起動まで nix に一元化できる。
   launchd.agents.moshi-hook = {
