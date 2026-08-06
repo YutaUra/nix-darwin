@@ -40,7 +40,6 @@ let
       "ralph-loop@claude-plugins-official" = true;
       "greptile@claude-plugins-official" = true;
       "document-skills@anthropic-agent-skills" = true;
-      "figma-implementation-core@sapuri-agent-plugins" = true;
       "yutaura-toolkit@yutaura-marketplace" = true;
     } // config._claude.extraPlugins;
     env = {

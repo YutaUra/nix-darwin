@@ -40,6 +40,11 @@ in
     core.fsmonitor = true;
   };
 
+  # sapuri-agent-plugins は社内リポジトリのため recruit / qall-k8s のみで有効化する
+  _claude.extraPlugins = {
+    "figma-implementation-core@sapuri-agent-plugins" = true;
+  };
+
   _claude.extraPermissions = [
     "Read(//quipper/monorepo/**)"
     "Edit(//quipper/monorepo/**)"
