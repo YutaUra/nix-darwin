@@ -57,6 +57,21 @@
       "com.apple.inputmethod.Kotoeri" = {
         JIMPrefLiveConversionKey = false;
       };
+
+      # ctrl+space の「前の入力ソースを選択」(hotkey ID 60) はエディタの
+      # 入力補完トリガーと衝突するため enabled = 0 で無効化する。
+      # symbolichotkeys は型付きオプションに無いため CustomUserPreferences で書き込む。
+      "com.apple.symbolichotkeys" = {
+        AppleSymbolicHotKeys = {
+          "60" = {
+            enabled = 0;
+            value = {
+              parameters = [ 32 49 262144 ];
+              type = "standard";
+            };
+          };
+        };
+      };
     };
   };
 
