@@ -23,6 +23,16 @@ let
     "Bash(playwright-cli:*)"
     "mcp__plugin_context7_context7__resolve-library-id"
     "mcp__plugin_context7_context7__query-docs"
+    # pnpm dlx / --filter / format / build を含めない理由: 任意実行・状態変更になるため。
+    "Bash(pnpm vitest:*)"
+    "Bash(pnpm lint:*)"
+    "Bash(pnpm typecheck:*)"
+    "Bash(pnpm test:*)"
+    # computer / navigate / javascript_tool を含めない理由: ページ状態変更・任意 JS 実行になるため。
+    "mcp__claude-in-chrome__find"
+    "mcp__claude-in-chrome__get_page_text"
+    "mcp__claude-in-chrome__read_page"
+    "mcp__claude-in-chrome__tabs_context_mcp"
   ];
 
   settingsJson = pkgs.writeText "claude-settings.json" (builtins.toJSON ({
@@ -38,7 +48,9 @@ let
       "security-guidance@claude-plugins-official" = true;
       "explanatory-output-style@claude-plugins-official" = true;
       "ralph-loop@claude-plugins-official" = true;
-      "greptile@claude-plugins-official" = true;
+      # 行削除ではなく false 明示にする理由: marketplace にインストール済みのため、
+      # エントリを消すだけだとローカル状態次第で有効に戻り得る。
+      "greptile@claude-plugins-official" = false;
       "document-skills@anthropic-agent-skills" = true;
       "yutaura-toolkit@yutaura-marketplace" = true;
     } // config._claude.extraPlugins;
