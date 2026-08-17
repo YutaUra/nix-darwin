@@ -13,12 +13,13 @@ let
 in
 {
   # プロファイル固有の config.toml 追記枠（_claude.extraPlugins と同じ方式）。
-  # TOML はテーブル（[keys] 等）以降の行がテーブル配下と解釈されるため、
-  # default_shell のようなトップレベルキーは共通設定より前に連結する。
+  # 共通設定の前に連結する理由: 後ろに繋ぐと共通側末尾の [[keys.command]] 配下に
+  # 追記行が飲み込まれるため。追記側は [terminal] 等のテーブルヘッダを自分で書くこと
+  # （共通側と同じテーブルを両方で定義すると TOML の重複テーブルエラーになる）。
   options._herdr.extraConfig = lib.mkOption {
     type = lib.types.lines;
     default = "";
-    description = "プロファイル固有の herdr config.toml 追記（トップレベルキー用、共通設定の前に連結）";
+    description = "プロファイル固有の herdr config.toml 追記（共通設定の前に連結）";
   };
 
   config = {

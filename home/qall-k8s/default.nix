@@ -38,6 +38,7 @@ in
   # ${pkgs.zsh}/bin/zsh を直接指定しない理由: LD_PRELOAD の jemalloc が
   # libstdc++.so.6 依存を解決できず起動に失敗するため、shim 経由が必要。
   _herdr.extraConfig = ''
+    [terminal]
     default_shell = "/usr/local/bin/zsh"
   '';
 
