@@ -34,6 +34,13 @@ in
   # zsh パッケージをラッパー版に置き換え
   programs.zsh.package = zshWrapped;
 
+  # herdr が開くシェルを zsh shim（unset LD_PRELOAD 付き、installZshShim で配置）にする。
+  # ${pkgs.zsh}/bin/zsh を直接指定しない理由: LD_PRELOAD の jemalloc が
+  # libstdc++.so.6 依存を解決できず起動に失敗するため、shim 経由が必要。
+  _herdr.extraConfig = ''
+    default_shell = "/usr/local/bin/zsh"
+  '';
+
   # monorepo での git status 高速化
   programs.git.settings = {
     core.untrackedcache = true;
