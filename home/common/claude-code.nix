@@ -48,6 +48,7 @@ let
       "security-guidance@claude-plugins-official" = true;
       "explanatory-output-style@claude-plugins-official" = true;
       "ralph-loop@claude-plugins-official" = true;
+      "skill-creator@claude-plugins-official" = true;
       # 行削除ではなく false 明示にする理由: marketplace にインストール済みのため、
       # エントリを消すだけだとローカル状態次第で有効に戻り得る。
       "greptile@claude-plugins-official" = false;
