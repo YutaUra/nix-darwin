@@ -1,6 +1,7 @@
 { pkgs, username, ... }: {
   imports = [
     ./homebrew.nix
+    ./heic-to-jpeg.nix
     # ./auto-update.nix  # 一旦無効化
   ];
 
