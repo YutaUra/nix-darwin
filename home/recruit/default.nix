@@ -38,6 +38,9 @@ in
     # DeployGate
     deploygate-cli
 
+    # ログを SQL で分析する CLI
+    logq
+
     # LiteLLM Proxy + Entra ID SSO 経由の Claude Code ランチャー（社内ツール）
     claudia
   ];
