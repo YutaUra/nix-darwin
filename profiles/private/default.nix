@@ -3,6 +3,7 @@
     builtins.elem (pkgs.lib.getName pkg) [
       "1password-cli"
       "claude-code"
+      "ssm-session-manager-plugin"
     ];
 
   # ログイン画面をユーザー一覧ではなく「名前＋パスワード」入力欄にする。

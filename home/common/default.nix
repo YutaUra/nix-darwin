@@ -26,6 +26,7 @@
     ripgrep
     duckdb
     awscli2
+    ssm-session-manager-plugin
     ffmpeg
     ncdu
     watch
