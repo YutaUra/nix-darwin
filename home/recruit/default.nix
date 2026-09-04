@@ -26,6 +26,9 @@ in
     # Python
     uv
 
+    # Go
+    go
+
     # PDF
     poppler-utils
 
