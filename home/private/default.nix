@@ -17,6 +17,9 @@ in
     # iOS の Moshi アプリから SSH ハンドシェイク後に UDP へ切り替えて接続するための mosh。
     # 回線切替（Wi-Fi↔モバイル）やスリープをまたいでもセッションが維持される。
     mosh
+
+    # ターミナル操作のデモ GIF を .tape スクリプトから生成する。
+    vhs
   ]) ++ [
     # Claude Code の hook(PreToolUse/Notification/Stop) から呼ばれ、承認待ちやターン完了を
     # iPhone の Moshi アプリへ通知する Go デーモン。ペアリング token は macOS Keychain に保存される。
