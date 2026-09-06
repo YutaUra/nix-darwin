@@ -27,6 +27,10 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
+# ビルドと cachix push に書き込みは不要なため GITHUB_TOKEN を読み取りに落とす。
+permissions:
+  contents: read
+
 jobs:
   build:
     name: ${{ matrix.attr }}
@@ -38,24 +42,28 @@ jobs:
           # 必要とするため Linux runner では原理的にビルドできない。
           # public リポジトリは hosted macOS runner が分数無制限で使えるので、
           # 自宅マシンの起動状態に依存しない hosted 側でビルドする。
+          #
+          # recruit を入れない理由: private リポジトリ quipper/claudia 由来の成果物を
+          # 公開キャッシュへ push してしまうため。closure の大半は private と共通なので
+          # 手元に残るビルドは claudia のみで済む。
           - attr: darwinConfigurations.private.system
-            runner: macos-15
-          - attr: darwinConfigurations.recruit.system
             runner: macos-15
           # aarch64-linux はそのまま ARM Linux runner で完結する。
           - attr: homeConfigurations.qall-k8s.activationPackage
             runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
     steps:
-      # 再利用ワークフローは呼び出し元の SHA で実行されるため、
-      # update.yml が新しく push したコミットを明示的に指定する必要がある。
-      - uses: actions/checkout@v4
+      # action を SHA 固定する理由: このジョブは cachix の write token を持つため、
+      # 上流が乗っ取られるとキャッシュ経由で全マシンの switch に侵入される。
+      # ref を明示する理由: 再利用ワークフローは呼び出し元の SHA で実行されるため、
+      # update.yml が新しく push したコミットを指さない。
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.ref }}
 
-      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
 
-      - uses: cachix/cachix-action@v15
+      - uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
         with:
           name: yutaura
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
