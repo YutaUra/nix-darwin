@@ -4,6 +4,11 @@ let
   moshi-hook = pkgs.callPackage ../../pkgs/moshi-hook.nix { };
 in
 {
+  # 共通デフォルトの effort low は「Fable は low でも旧モデルの高 effort を上回る」
+  # という前提に依っており Opus には成り立たないため、auto でモデル側に選ばせる。
+  _claude.model = "claude-opus-5";
+  _claude.effortLevel = "auto";
+
   # private 固有の home.packages
   home.packages = (with pkgs; [
     # AI コーディングエージェント用のターミナルマルチプレクサ

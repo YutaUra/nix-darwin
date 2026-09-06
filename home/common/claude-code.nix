@@ -69,7 +69,7 @@ let
       # 常にモデル既定値 (high) になる。--settings で明示しても high のままだが、
       # CLAUDE_CODE_EFFORT_LEVEL は反映されることを実測で確認したため env 側で指定する。
       # 将来 effortLevel が機能するようになったらこの行は削除してよい。
-      CLAUDE_CODE_EFFORT_LEVEL = "low";
+      CLAUDE_CODE_EFFORT_LEVEL = config._claude.effortLevel;
       # CLAUDE_CODE_USE_BEDROCK = "1";
       # AWS_PROFILE = "jp-sandbox";
       # ANTHROPIC_MODEL = "jp.anthropic.claude-sonnet-4-5-20250929-v1:0";
@@ -83,7 +83,7 @@ let
     # 一度 "Yes, and make it my default mode" を選んだ場合に Claude が自動で書き込む値だが、
     # ここで宣言的に true にしておくことで dialog 表示自体をスキップできる。
     skipAutoPermissionPrompt = true;
-    # デフォルトを最上位モデル Fable にする理由:
+    # 共通デフォルトを最上位モデル Fable にする理由:
     # Fable は Anthropic 最高性能のモデル（料金は Opus の約2倍、高 effort だと
     # 1ターン数分かかることもある）。全会話の起点となる default に据えることで、
     # 素の能力の高さを常時活かす。
@@ -104,8 +104,8 @@ let
       type = "command";
       command = lib.getExe' runcat-statusline "runcat-statusline";
     };
-    model = "claude-fable-5";
-    effortLevel = "low";
+    model = config._claude.model;
+    effortLevel = config._claude.effortLevel;
     autoMemoryEnabled = false;
     language = "日本語";
     feedbackSurveyRate = 0;
@@ -115,6 +115,16 @@ let
 in
 {
   options._claude = {
+    model = lib.mkOption {
+      type = lib.types.str;
+      default = "claude-fable-5";
+      description = "Claude Code のデフォルトモデル ID";
+    };
+    effortLevel = lib.mkOption {
+      type = lib.types.str;
+      default = "low";
+      description = "Claude Code のデフォルト effort レベル";
+    };
     extraPermissions = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [];
