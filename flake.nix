@@ -65,7 +65,7 @@
           inherit system;
           specialArgs = { inherit username configName; };
           modules = [
-            { nixpkgs.overlays = [ (import ./overlays/claude-code.nix) (import ./overlays/gws.nix) (import ./overlays/claudia.nix) (import ./overlays/logq.nix) (final: _: { gati = inputs.gati.packages.${final.system}.default; zyouz = inputs.zyouz.packages.${final.system}.default; herdr = inputs.herdr.packages.${final.system}.default; }) ]; }
+            { nixpkgs.overlays = [ (import ./overlays/claude-code.nix) (import ./overlays/gws.nix) (import ./overlays/claudia.nix) (import ./overlays/logq.nix) (_: _: { gati = inputs.gati.packages.${system}.default; zyouz = inputs.zyouz.packages.${system}.default; herdr = inputs.herdr.packages.${system}.default; }) ]; }
             ./hosts/${hostname}/default.nix
             nix-homebrew.darwinModules.nix-homebrew
             {
@@ -116,7 +116,7 @@
             (import ./overlays/claude-code.nix)
             (import ./overlays/gws.nix)
             # コンテナ環境では TTY がなく gati のテストが失敗するため doCheck を無効化
-            (final: _: { gati = inputs.gati.packages.${final.system}.default.overrideAttrs { doCheck = false; }; zyouz = inputs.zyouz.packages.${final.system}.default; herdr = inputs.herdr.packages.${final.system}.default; })
+            (_: _: { gati = inputs.gati.packages.aarch64-linux.default.overrideAttrs { doCheck = false; }; zyouz = inputs.zyouz.packages.aarch64-linux.default; herdr = inputs.herdr.packages.aarch64-linux.default; })
           ];
         };
         extraSpecialArgs = { inherit (inputs) herdr-plugin-hunk; };
