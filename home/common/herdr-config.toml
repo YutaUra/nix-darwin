@@ -8,6 +8,10 @@
 # `herdr config reset-keys` 等の herdr 側からの書き込みは効かない。
 # キーバインドの管理は nix 側に一元化する、という宣言。
 
+# herdr は完了時にこのファイルへ書き戻そうとして permission denied になり、
+# 未設定は未完了扱い（onboarding.unwrap_or(true)）で毎回表示されるため明示する。
+onboarding = false
+
 [keys]
 # プレフィックスキーは既定の ctrl+b のまま（明示不要）。
 # 既定バインドと衝突しないキーを custom command に割り当てる。
