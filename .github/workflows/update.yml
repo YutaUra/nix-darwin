@@ -33,3 +33,12 @@ jobs:
           git diff --cached --quiet && echo "Already up to date" && exit 0
           git commit -m "依存パッケージを更新"
           git push
+
+  # GITHUB_TOKEN による push は on:push を発火させないため、
+  # 依存更新後のビルドは build.yml を直接呼び出して繋ぐ。
+  build:
+    needs: update
+    uses: ./.github/workflows/build.yml
+    with:
+      ref: main
+    secrets: inherit

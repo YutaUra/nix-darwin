@@ -1,0 +1,64 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**.nix"
+      - "flake.lock"
+      - "overlays/**"
+      - ".github/workflows/build.yml"
+  # update.yml からの明示呼び出し用。
+  # GITHUB_TOKEN による push は再帰実行防止で on:push を発火させないため、
+  # 依存更新経路は workflow_call で直接繋ぐ必要がある。
+  workflow_call:
+    inputs:
+      ref:
+        description: "checkout する ref。未指定なら呼び出し元の SHA"
+        type: string
+        default: ""
+    secrets:
+      CACHIX_AUTH_TOKEN:
+        required: true
+  workflow_dispatch:
+
+# 同一ブランチで走行中のビルドは新しい push に譲る
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: ${{ matrix.attr }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # darwin の derivation は darwin stdenv（Apple SDK / cctools / libSystem）を
+          # 必要とするため Linux runner では原理的にビルドできない。
+          # public リポジトリは hosted macOS runner が分数無制限で使えるので、
+          # 自宅マシンの起動状態に依存しない hosted 側でビルドする。
+          - attr: darwinConfigurations.private.system
+            runner: macos-15
+          - attr: darwinConfigurations.recruit.system
+            runner: macos-15
+          # aarch64-linux はそのまま ARM Linux runner で完結する。
+          - attr: homeConfigurations.qall-k8s.activationPackage
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      # 再利用ワークフローは呼び出し元の SHA で実行されるため、
+      # update.yml が新しく push したコミットを明示的に指定する必要がある。
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - uses: cachix/cachix-action@v15
+        with:
+          name: yutaura
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Build
+        run: nix build --no-link --print-out-paths '.#${{ matrix.attr }}'
