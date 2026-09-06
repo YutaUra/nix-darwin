@@ -45,6 +45,8 @@ darwin-rebuild build --flake '.#private'   # build のみ（sudo 不要）
 
 `switch` には sudo が必要。`build` のみであれば不要。
 
+ただし `build` は CPU コストが高い。変更の検証目的では下記「変更後の検証方針」を参照。
+
 ### Linux コンテナ（home-manager）
 
 K8s 開発コンテナでは `/quipper/dotfiles/install` が自動実行され、Nix + home-manager がセットアップされる。
@@ -55,6 +57,31 @@ cd ~/.config/home-manager
 git pull
 home-manager switch --flake .#qall-k8s
 ```
+
+## 変更後の検証方針
+
+**Claude は原則としてビルド（`darwin-rebuild build` / `nix build`）を実行しない。**
+
+このリポジトリは Rust 製ツール（claudia, logq, gati, zyouz, herdr, moshi-hook）を
+ソースからビルドするため、build はキャッシュミス時に CPU を数分〜数十分占有し、
+作業中のマシンの体感速度を大きく損なう。
+
+代わりにコストの低い順で検証する。
+
+| レベル | コマンド | 検出できるもの | コスト |
+|---|---|---|---|
+| L0 構文 | `nix-instantiate --parse <変更した>.nix` | 構文エラー | 一瞬 |
+| L1 評価 | `nix eval --raw '.#darwinConfigurations.<profile>.config.system.build.toplevel.drvPath'` | option 名タイポ、型不一致、未定義 attribute、import 漏れ、`git add` 忘れ | コンパイルなし |
+| L2 ビルド | `darwin-rebuild build --flake '.#<profile>'` | 実際のビルド失敗のみ | 高 CPU |
+
+- 既定は **L0 → L1 まで**。Nix は評価と実現が分離しており、設定の誤りは L1 で落ちる
+- **L2 はユーザーが明示的に「ビルドして」と言った場合のみ**実行する。自発的に走らせない
+- home-manager 側は `nix eval --raw '.#homeConfigurations.qall-k8s.activationPackage.drvPath'`
+- 新規パッケージ追加・overlay の rev 変更など評価では検出できない変更をした場合は、
+  「L1 は通ったが実ビルドは未検証」と明示して報告し、ビルドするかの判断をユーザーに委ねる
+- L2 を回すときは `--max-jobs 2 --cores 4` 等で CPU を絞る
+- ユーザーレベルの TDD ガイドライン「変更後は必ず全テストを実行する」は、
+  このリポジトリでは「L1 評価を通す」と読み替える
 
 ## 自動更新（現在無効）
 
