@@ -20,4 +20,7 @@
   # FUS はシステム全体(/Library/Preferences/.GlobalPreferences)の MultipleSessionEnabled で
   # 制御されるため、システムドメインへ直接書く必要がある。
   system.defaults.CustomSystemPreferences."/Library/Preferences/.GlobalPreferences".MultipleSessionEnabled = true;
+
+  # launchd + find で自前削除しない理由: 30 日固定で足りるため、不可逆な削除を自前で持たない
+  system.defaults.finder.FXRemoveOldTrashItems = true;
 }
