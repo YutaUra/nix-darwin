@@ -48,6 +48,16 @@ if [ -d /nix ]; then
   fi
 fi
 
+# ユーザー側 (~/.config/nix/nix.conf) に書かない理由: daemon の trusted-users は
+# root のみで、untrusted user の substituter 指定は黙って無視されるため。
+if [ -d /nix ] && ! grep -q 'yutaura.cachix.org' /etc/nix/nix.conf 2>/dev/null; then
+  echo "yutaura.cachix.org を substituter に追加中..."
+  sudo tee -a /etc/nix/nix.conf > /dev/null <<'EOF'
+extra-substituters = https://yutaura.cachix.org
+extra-trusted-public-keys = yutaura.cachix.org-1:uoMGhQXiri/CBTK1IByqBipk42mkEfWhYo2q9ENseJ8=
+EOF
+fi
+
 # nix.conf 変更を反映するため、既存の daemon を停止
 if pgrep -x nix-daemon > /dev/null 2>&1; then
   echo "Nix daemon を再起動するため停止中..."
