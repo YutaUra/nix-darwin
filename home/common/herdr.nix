@@ -13,20 +13,22 @@ let
 in
 {
   # プロファイル固有の config.toml 追記枠（_claude.extraPlugins と同じ方式）。
-  # 共通設定の前に連結する理由: 後ろに繋ぐと共通側末尾の [[keys.command]] 配下に
-  # 追記行が飲み込まれるため。追記側は [terminal] 等のテーブルヘッダを自分で書くこと
-  # （共通側と同じテーブルを両方で定義すると TOML の重複テーブルエラーになる）。
+  # 共通設定の後ろに連結する理由: 前置すると extraConfig 末尾のテーブルヘッダに
+  # 共通側先頭の top-level キー（onboarding 等）が飲み込まれるため。
+  # 追記側は [terminal] 等のテーブルヘッダを自分で書くこと（ヘッダなしだと共通側
+  # 末尾の [[keys.command]] 配下に飲み込まれる。共通側と同じテーブルを両方で
+  # 定義すると TOML の重複テーブルエラーになる）。
   options._herdr.extraConfig = lib.mkOption {
     type = lib.types.lines;
     default = "";
-    description = "プロファイル固有の herdr config.toml 追記（共通設定の前に連結）";
+    description = "プロファイル固有の herdr config.toml 追記（共通設定の後ろに連結）";
   };
 
   config = {
     # config.toml は herdr が通常書き込まないユーザー所有ファイルなので、plugins.json と違い
     # nix store への symlink として直接配置してよい（plugins.json は herdr 管理のため link 方式）。
     home.file.".config/herdr/config.toml".source = pkgs.writeText "herdr-config.toml" (
-      config._herdr.extraConfig + builtins.readFile ./herdr-config.toml
+      builtins.readFile ./herdr-config.toml + config._herdr.extraConfig
     );
 
     # herdr の worktree-include plugin を宣言的に登録する。
