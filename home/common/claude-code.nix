@@ -83,16 +83,14 @@ let
     # 一度 "Yes, and make it my default mode" を選んだ場合に Claude が自動で書き込む値だが、
     # ここで宣言的に true にしておくことで dialog 表示自体をスキップできる。
     skipAutoPermissionPrompt = true;
-    # 共通デフォルトを最上位モデル Fable にする理由:
-    # Fable は Anthropic 最高性能のモデル（料金は Opus の約2倍、高 effort だと
-    # 1ターン数分かかることもある）。全会話の起点となる default に据えることで、
-    # 素の能力の高さを常時活かす。
+    # 共通デフォルトを Fable ではなく Opus にする理由:
+    # Fable は最高性能だが料金が Opus の約2倍で、高 effort だと 1 ターン数分かかる
+    # こともある。日常用途では Opus で十分なため、コストと速度のバランスで Opus を既定にする。
     # effortLevel は 2.1.210 時点では機能しないため、実効値は env の
     # CLAUDE_CODE_EFFORT_LEVEL 側で指定している。ここは宣言的な意図の記録として残す。
-    # effort を low にする理由:
-    # default は毎ターン走るためコストとレイテンシが直接効く。Fable は low でも
-    # 旧モデルの xhigh/max を上回ることが多く「low=浅い」が当てはまらないため、
-    # 軽快さとコストを優先して low を既定にする。重いタスクは都度 effort を上げて escalate する。
+    # effort を auto にする理由:
+    # Fable と違い Opus は「low でも常に十分深い」とは言えないため、
+    # 固定値ではなくタスクの重さに応じてモデル側に選ばせる。
     # "fable"/"opus" エイリアスを使わない理由:
     # Claude Code 独自エイリアスは最新世代に自動追従するが、実際に解決される
     # モデル ID が CLI 側の更新タイミングに依存し不透明。
@@ -117,12 +115,12 @@ in
   options._claude = {
     model = lib.mkOption {
       type = lib.types.str;
-      default = "claude-fable-5";
+      default = "claude-opus-5";
       description = "Claude Code のデフォルトモデル ID";
     };
     effortLevel = lib.mkOption {
       type = lib.types.str;
-      default = "low";
+      default = "auto";
       description = "Claude Code のデフォルト effort レベル";
     };
     extraPermissions = lib.mkOption {
