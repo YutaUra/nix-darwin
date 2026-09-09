@@ -18,6 +18,56 @@ let
     ${builtins.readFile ./runcat-statusline.py}
   '';
 
+  # buildNpmPackage を使わない理由: dependencies ゼロで dist にバンドル済みのため
+  # npm install も npmDepsHash 維持も不要。
+  # npx を使わない理由: statusLine は毎ターン同期実行されるので、パッケージ解決の
+  # 遅延がそのまま体感ラグになる。
+  claude-powerline = pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
+    pname = "claude-powerline";
+    version = "1.30.3";
+
+    src = pkgs.fetchurl {
+      url = "https://registry.npmjs.org/@owloops/claude-powerline/-/claude-powerline-${finalAttrs.version}.tgz";
+      hash = "sha256-mj0BLH25GDmj5Fp2KdvQd+Y/971BNcMcceoydwIzkJo=";
+    };
+
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    dontBuild = true;
+
+    # git を PATH に足す理由: git セグメントが git を spawn するが、
+    # K8s コンテナでは PATH に git が居ないことがある。
+    installPhase = ''
+      runHook preInstall
+
+      mkdir -p "$out/lib/claude-powerline"
+      cp -r dist "$out/lib/claude-powerline/"
+
+      makeWrapper ${lib.getExe' pkgs.nodejs "node"} "$out/bin/claude-powerline" \
+        --add-flags "$out/lib/claude-powerline/dist/index.mjs" \
+        --prefix PATH : ${lib.makeBinPath [ pkgs.git ]}
+
+      runHook postInstall
+    '';
+
+    meta.mainProgram = "claude-powerline";
+  });
+
+  # 1 本のラッパーに集約する理由: statusLine はコマンドを 1 つしか取れず、payload は
+  # RunCat 連携と描画の両方に必要。stdin は一度しか読めないので配り直す。
+  claude-statusline = pkgs.writeShellScriptBin "claude-statusline" ''
+    payload="$(cat)"
+
+    # runcat 出力をフォールバックに使う理由: claude-powerline は git と usage API に
+    # 依存するため失敗しうるが、空行だとモデル名すら分からなくなる。
+    fallback="$(printf '%s' "$payload" | ${lib.getExe' runcat-statusline "runcat-statusline"})"
+
+    if rendered="$(printf '%s' "$payload" | ${lib.getExe claude-powerline})" && [ -n "$rendered" ]; then
+      printf '%s\n' "$rendered"
+    else
+      printf '%s\n' "$fallback"
+    fi
+  '';
+
   basePermissions = [
     "WebSearch"
     "Bash(playwright-cli:*)"
@@ -100,7 +150,7 @@ let
     # .claude-private 側で動かしても RunCat Neo の参照先は 1 つで済む。
     statusLine = {
       type = "command";
-      command = lib.getExe' runcat-statusline "runcat-statusline";
+      command = lib.getExe' claude-statusline "claude-statusline";
     };
     model = config._claude.model;
     effortLevel = config._claude.effortLevel;
@@ -154,6 +204,12 @@ in
         baseFiles = {
           "CLAUDE.md".source = ./claude-md/CLAUDE.md;
           "settings.json".source = settingsJson;
+          # nix attrset に変換せず JSON 原文を置く理由: powerline.owloops.com が
+          # 生成する設定で、再編集は GUI への貼り付け往復になるため。
+          # .claude-private 側にも置く理由: v1.30.3 の探索パスは
+          # os.homedir()/.claude 固定で CLAUDE_CONFIG_DIR を見ないが、
+          # 上流が対応したとき片側だけ効かなくなるのを避ける。
+          "claude-powerline.json".source = ./claude-powerline.json;
         }
         # gwsSkills / yutauraRules の attrset から ".claude/" prefix を剥がす
         // (lib.mapAttrs' (n: v:
