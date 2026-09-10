@@ -10,6 +10,7 @@
     ./zellij.nix
     ./zyouz.nix
     ./herdr.nix
+    ./gws.nix
   ];
 
   home.stateVersion = "24.11";
@@ -34,7 +35,6 @@
     # 開発ツール
     claude-code
     gati
-    gws
     google-cloud-sdk
     zed-editor
 
