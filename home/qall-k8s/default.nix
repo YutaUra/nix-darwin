@@ -29,6 +29,7 @@ in
     ../common/yazi.nix
     ../common/direnv.nix
     ../common/herdr.nix
+    ../common/gws.nix
   ];
 
   # zsh パッケージをラッパー版に置き換え
