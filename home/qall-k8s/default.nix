@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, config, ... }:
 let
   # LD_PRELOAD の jemalloc がシステムの libstdc++ を必要とするため、
   # zsh 起動前に LD_PRELOAD を解除するラッパー
@@ -170,5 +170,23 @@ in
   # image 側 CLI の解決順序を崩さないようにする。
   home.activation.installZshShim = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
     /usr/bin/sudo /usr/bin/ln -sfn "${zshWrapped}/bin/zsh" /usr/local/bin/zsh
+  '';
+
+  # systemd がないため nix-gc.timer も services.home-manager.autoExpire も動かない。
+  # 世代を切らない限り全依存が gcroot として残り、GC は何も回収できない。
+  # 日数ではなく世代数で切る理由: switch 頻度に依存せず保持上限が固定できる。
+  # home-manager expire-generations を使わない理由: pkgs.nix 同梱の nix-env なら
+  # PATH に依存せず絶対パスで参照できる。
+  home.activation.expireGenerations = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    # パスは home-manager のバージョンで揺れる。決め打つと、存在しない側を指したとき
+    # nix-env が別 profile を新規作成し、エラーも出ないまま expire されなくなる。
+    for hmProfile in \
+      "''${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles/home-manager" \
+      "/nix/var/nix/profiles/per-user/${config.home.username}/home-manager"; do
+      if [ -e "$hmProfile" ]; then
+        $DRY_RUN_CMD ${pkgs.nix}/bin/nix-env \
+          --profile "$hmProfile" --delete-generations +10
+      fi
+    done
   '';
 }

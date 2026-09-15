@@ -58,6 +58,17 @@ extra-trusted-public-keys = yutaura.cachix.org-1:uoMGhQXiri/CBTK1IByqBipk42mkEfW
 EOF
 fi
 
+# min-free を切ると daemon がビルド時に max-free まで自動 GC する。
+# タイマーではないので systemd / cron のないこの環境でも成立する。
+# ユーザー側に書かない理由は上の substituter と同じ（daemon 側の設定）。
+if [ -d /nix ] && ! grep -q '^min-free' /etc/nix/nix.conf 2>/dev/null; then
+  echo "min-free / max-free を設定中..."
+  sudo tee -a /etc/nix/nix.conf > /dev/null <<'EOF'
+min-free = 10737418240
+max-free = 32212254720
+EOF
+fi
+
 # nix.conf 変更を反映するため、既存の daemon を停止
 if pgrep -x nix-daemon > /dev/null 2>&1; then
   echo "Nix daemon を再起動するため停止中..."
