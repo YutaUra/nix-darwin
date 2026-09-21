@@ -7,15 +7,10 @@
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
-    # nix-homebrew 上流の brew ピンが古く、cask の新 DSL（postflight_steps 等）を
-    # 解釈できず brew bundle が失敗するため brew-src を直接 override する。
-    # flake update では追従できないので、同種のエラーが出たらこの ref を上げる。
-    brew-src = {
-      url = "github:Homebrew/brew/6.0.17";
-      flake = false;
-    };
-    nix-homebrew.inputs.brew-src.follows = "brew-src";
+    # HEAD 追従にしない理由: c11cccf 以降の modules/brew.tail.sh は brew 7.x から
+    # 再生成されており HOMEBREW_ORIGINAL_BREW_FILE の export を欠くため、
+    # brew bundle が `key not found` で落ちる。上流が tail を直したら追従に戻す。
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew/09a921d0181146cf6163ec2cc1db7b6fd539a885";
     gati.url = "github:YutaUra/gati";
     zyouz.url = "github:YutaUra/zyouz";
     # herdr は nixpkgs を nixos-unstable にピンしているが follows 未宣言のため、
