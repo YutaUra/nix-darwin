@@ -61,7 +61,42 @@ let
     # 依存するため失敗しうるが、空行だとモデル名すら分からなくなる。
     fallback="$(printf '%s' "$payload" | ${lib.getExe' runcat-statusline "runcat-statusline"})"
 
-    if rendered="$(printf '%s' "$payload" | ${lib.getExe claude-powerline})" && [ -n "$rendered" ]; then
+    # claude-powerline は幅から 45 桁引く (Claude Code が右端に出す更新通知を避けるため)。
+    # 110 桁以下ではその通知が下の行に回り右側が空くので、実幅 + 45 を渡して相殺する。
+    # COLUMNS を基準にしない理由: Claude Code は子プロセスに COLUMNS=0 を渡してくる。
+    find_parent_tty() {
+      pid=$$
+      depth=0
+      while [ "$depth" -lt 10 ]; do
+        info="$(ps -o ppid=,tty= -p "$pid" 2>/dev/null)" || return 1
+        [ -n "$info" ] || return 1
+        set -- $info
+        ppid="$1"
+        tty_dev="''${2:-}"
+        case "$tty_dev" in
+          "" | "?" | "??") ;;
+          *) printf '%s' "$tty_dev"; return 0 ;;
+        esac
+        case "$ppid" in
+          "" | 0 | 1) return 1 ;;
+        esac
+        pid="$ppid"
+        depth=$((depth + 1))
+      done
+      return 1
+    }
+
+    # 空文字なら powerline 側が自前検出に落ちるため、取得失敗時は素通しでよい。
+    powerline_columns=""
+    if tty_dev="$(find_parent_tty)"; then
+      term_cols="$(stty size < "/dev/$tty_dev" 2>/dev/null | cut -d' ' -f2)"
+      case "$term_cols" in
+        "" | *[!0-9]*) ;;
+        *) [ "$term_cols" -le 110 ] && powerline_columns=$((term_cols + 45)) ;;
+      esac
+    fi
+
+    if rendered="$(printf '%s' "$payload" | COLUMNS="$powerline_columns" ${lib.getExe claude-powerline})" && [ -n "$rendered" ]; then
       printf '%s\n' "$rendered"
     else
       printf '%s\n' "$fallback"
