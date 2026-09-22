@@ -209,6 +209,9 @@ in
           # .claude-private 側にも置く理由: v1.30.3 の探索パスは
           # os.homedir()/.claude 固定で CLAUDE_CONFIG_DIR を見ないが、
           # 上流が対応したとき片側だけ効かなくなるのを避ける。
+          # autocompactBuffer に Studio 既定の 33000 を使わない理由: 33000 は warn 開始点
+          # (window - 33000) で、auto-compact 発火点 (window - 13000) ではない。直前 20000
+          # トークンが 0% に潰れる。GUI から貼り直すと既定値に戻るので注意。
           "claude-powerline.json".source = ./claude-powerline.json;
         }
         # gwsSkills / yutauraRules の attrset から ".claude/" prefix を剥がす
