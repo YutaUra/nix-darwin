@@ -29,6 +29,22 @@
 
   outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, nix-homebrew, zyouz, ... }:
     let
+      # herdr が静的リンクする Zig 製 libghostty-vt の compiler_rt.o には ld.bfd が
+      # 解決できないリロケーションが .debug_loc と .eh_frame に残っており、GCC 16 を
+      # 既定にした nixpkgs では "undefined reference to `no symbol'" でリンクが落ちる。
+      # --strip-debug では失敗箇所が .debug_loc から .eh_frame へ移るだけで通らない。
+      #
+      # CARGO_TARGET_<TRIPLE>_LINKER ではなく RUSTFLAGS を使う理由: nixpkgs の
+      # cargoBuildHook が前者を cargo の起動コマンドに直接渡すため上書きできない。
+      # -Cforce-frame-pointers=yes を再掲する理由: 環境変数の RUSTFLAGS は cargo 設定側の
+      # target.<triple>.rustflags を置き換え、nixpkgs の既定フラグが失われるため。
+      herdrLinkedWithLld = pkgs:
+        inputs.herdr.packages.aarch64-linux.default.overrideAttrs (old: {
+          env = old.env // {
+            RUSTFLAGS = "-Cforce-frame-pointers=yes -Clink-arg=-fuse-ld=lld -Clink-arg=-B${pkgs.lld}/bin";
+          };
+        });
+
       # macOS self-hosted GitHub Actions runner 用のサービスユーザー _ghrunner を
       # 宣言的に作成し、その home 環境を home-manager で管理する再利用モジュール。
       # 複数マシンで同じ runner ユーザーを用意できるよう、mkDarwin の extraModules に
@@ -110,8 +126,12 @@
           overlays = [
             (import ./overlays/claude-code.nix)
             (import ./overlays/gws.nix)
-            # コンテナ環境では TTY がなく gati のテストが失敗するため doCheck を無効化
-            (_: _: { gati = inputs.gati.packages.aarch64-linux.default.overrideAttrs { doCheck = false; }; zyouz = inputs.zyouz.packages.aarch64-linux.default; herdr = inputs.herdr.packages.aarch64-linux.default; })
+            (final: _: {
+              # コンテナ環境では TTY がなく gati のテストが失敗するため doCheck を無効化
+              gati = inputs.gati.packages.aarch64-linux.default.overrideAttrs { doCheck = false; };
+              zyouz = inputs.zyouz.packages.aarch64-linux.default;
+              herdr = herdrLinkedWithLld final;
+            })
           ];
         };
         extraSpecialArgs = { inherit (inputs) herdr-plugin-hunk; };
