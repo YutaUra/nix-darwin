@@ -1,5 +1,25 @@
 {
   "nodes": {
+    "beads": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791712738,
+        "narHash": "sha256-5X90FKimBiSRLKp8vLmfzkYRbqXEFK4YXjv3zlccl40=",
+        "owner": "gastownhall",
+        "repo": "beads",
+        "rev": "7477ec1352d9380b692773bc3c2e66ae2e60ae37",
+        "type": "github"
+      },
+      "original": {
+        "owner": "gastownhall",
+        "repo": "beads",
+        "type": "github"
+      }
+    },
     "brew-src": {
       "flake": false,
       "locked": {
@@ -219,6 +239,7 @@
     },
     "root": {
       "inputs": {
+        "beads": "beads",
         "gati": "gati",
         "herdr": "herdr",
         "herdr-plugin-hunk": "herdr-plugin-hunk",

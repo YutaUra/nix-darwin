@@ -4,6 +4,11 @@ let
   moshi-hook = pkgs.callPackage ../../pkgs/moshi-hook.nix { };
 in
 {
+  imports = [
+    # Gas Town（gt）本体と周辺依存（beads / dolt / tmux / shell 連携）の一式。
+    ./gastown.nix
+  ];
+
   # private 固有の home.packages
   home.packages = (with pkgs; [
     # AI コーディングエージェント用のターミナルマルチプレクサ

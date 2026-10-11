@@ -25,6 +25,17 @@
       url = "github:edmundmiller/herdr-plugin-hunk";
       flake = false;
     };
+    # beads（bd）— gastown がエージェントの外部メモリとして使う issue tracker。
+    # gastown を pkgs/gastown.nix で自前ビルドしているのにこちらは flake 出力を
+    # 使う理由: beads は上流が nix を現役で保守しており（overlay.nix / packages.nix
+    # を公開し、vendorHash も HEAD と整合している）、completion 生成と
+    # metrics 無効化を含む wrapper をそのまま享受できる。
+    #
+    # nixpkgs を follows させる理由: 上流は nixos-25.11 をピンしていて Go 1.26.4 しか
+    # 渡せず、HEAD の go.mod が要求する `go 1.26.5` を満たさないままビルドが落ちる。
+    # こちらの nixpkgs（Go 1.26.8）へ寄せると解消し、nixpkgs の二重取り込みも防げる。
+    beads.url = "github:gastownhall/beads";
+    beads.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, nix-homebrew, zyouz, ... }:
@@ -76,7 +87,7 @@
           inherit system;
           specialArgs = { inherit username configName; };
           modules = [
-            { nixpkgs.overlays = [ (import ./overlays/claude-code.nix) (import ./overlays/gws.nix) (import ./overlays/claudia.nix) (import ./overlays/logq.nix) (_: _: { gati = inputs.gati.packages.${system}.default; zyouz = inputs.zyouz.packages.${system}.default; herdr = inputs.herdr.packages.${system}.default; }) ]; }
+            { nixpkgs.overlays = [ (import ./overlays/claude-code.nix) (import ./overlays/gws.nix) (import ./overlays/claudia.nix) (import ./overlays/logq.nix) (_: _: { gati = inputs.gati.packages.${system}.default; zyouz = inputs.zyouz.packages.${system}.default; herdr = inputs.herdr.packages.${system}.default; beads = inputs.beads.packages.${system}.default; }) ]; }
             ./hosts/${hostname}/default.nix
             nix-homebrew.darwinModules.nix-homebrew
             {
