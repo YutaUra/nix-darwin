@@ -31,6 +31,14 @@ in
     llm-with-decisions
   ];
 
+  # yutaura-private を home/common ではなく private に置く理由:
+  # この plugin の skill は llm + llm-openai-decisions の存在を前提とする。
+  # home/common で有効化すると recruit / qall-k8s にも配られ、
+  # 「あるはずのコマンドが無い」skill が発火してしまう。
+  _claude.extraPlugins = {
+    "yutaura-private@yutaura-marketplace" = true;
+  };
+
   # ~/.aws/config を宣言的に管理する（private マシンのみ）。
   # アカウント ID と SSO スタート URL は AWS 公式見解では秘密情報ではないため
   # 平文で commit している。認証情報そのもの（SSO トークン等）は
