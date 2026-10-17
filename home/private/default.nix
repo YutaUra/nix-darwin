@@ -2,6 +2,7 @@
 let
   # moshi-hook は nixpkgs に無いためビルド済みバイナリを自前パッケージ化している（pkgs/moshi-hook.nix）。
   moshi-hook = pkgs.callPackage ../../pkgs/moshi-hook.nix { };
+  llm-with-decisions = pkgs.callPackage ../../pkgs/llm-with-decisions.nix { };
 in
 {
   imports = [
@@ -24,6 +25,10 @@ in
     # Claude Code の hook(PreToolUse/Notification/Stop) から呼ばれ、承認待ちやターン完了を
     # iPhone の Moshi アプリへ通知する Go デーモン。ペアリング token は macOS Keychain に保存される。
     moshi-hook
+
+    # OpenAI Decisions API を叩く llm CLI。store が read-only で `llm install` が
+    # 使えないため、プラグインの追加は pkgs/llm-with-decisions.nix 側で行う。
+    llm-with-decisions
   ];
 
   # ~/.aws/config を宣言的に管理する（private マシンのみ）。
