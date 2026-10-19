@@ -7,11 +7,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792260470,
-        "narHash": "sha256-45hezVk/42e1ruoTD4vcvjHbtNSogAZ6RqicF4uf3g4=",
+        "lastModified": 1792358457,
+        "narHash": "sha256-lWlkcb4zpR5cQbf5pQB1ujeecbA40yac4EHJyHQM8IM=",
         "owner": "gastownhall",
         "repo": "beads",
-        "rev": "4a67d0d0288c1b4ee23e17fc896f47616931ba2d",
+        "rev": "5c9c02ab77a3e52a861e45f0b9712628eba8ad34",
         "type": "github"
       },
       "original": {
@@ -157,11 +157,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786845137,
-        "narHash": "sha256-oQFip+v0luP8NIxJzmiW4Wu8bILsbFWom5l0zonl8hQ=",
+        "lastModified": 1792366139,
+        "narHash": "sha256-jto4pdsl0bgErQ5vaMc3gOyj//PILLRJuqX3I7fUk6s=",
         "owner": "nix-darwin",
         "repo": "nix-darwin",
-        "rev": "4cff07de74b50e64bdd68cd4e722ab5b6b35ee48",
+        "rev": "f0ec2b3fae4df92ea7788359aef9e07bb88d720f",
         "type": "github"
       },
       "original": {
