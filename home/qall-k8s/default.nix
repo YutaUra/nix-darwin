@@ -120,6 +120,9 @@ in
     gh
     gati
 
+    # Kubernetes
+    argocd
+
     # AI コーディングエージェント用のターミナルマルチプレクサ
     herdr
 

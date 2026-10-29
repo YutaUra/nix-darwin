@@ -22,6 +22,7 @@ in
     kubectl
     stern
     kustomize
+    argocd
 
     # Python
     uv
