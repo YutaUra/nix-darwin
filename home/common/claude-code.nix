@@ -120,7 +120,11 @@ let
     "mcp__claude-in-chrome__tabs_context_mcp"
   ];
 
-  settingsJson = pkgs.writeText "claude-settings.json" (builtins.toJSON ({
+  # settings.json を 1 つ共有せず claude 設定ディレクトリごとに生成する理由:
+  # moshi-hook は CLAUDE_CODE_PLUGIN_DIRS が「その設定ディレクトリ配下の moshi-plugin」を
+  # 正確に指しているかを文字列比較で検査する。両 root へ同一ファイルを配ると
+  # 片方が必ず不一致になり、moshi 側から hooks が「未インストール」と見なされる。
+  mkSettingsJson = claudeDir: pkgs.writeText "claude-settings.json" (builtins.toJSON ({
     enabledPlugins = {
       "figma@claude-plugins-official" = true;
       "code-review@claude-plugins-official" = true;
@@ -139,11 +143,18 @@ let
       "greptile@claude-plugins-official" = false;
       "document-skills@anthropic-agent-skills" = true;
       "yutaura-toolkit@yutaura-marketplace" = true;
+      "modern-web-guidance@googlechrome" = true;
       "natural-japanese@natural-japanese" = true;
     } // config._claude.extraPlugins;
     # /plugin marketplace add を手で打たずに宣言する理由: 新しい K8s コンテナでも
     # 初回起動時に marketplace が自動登録され、プロファイル間で状態がずれない。
+    # claude-plugins-official 版を使わない理由: 第三者プラグインの更新が
+    # 2026-10 に止まり v0.0.194 で固定されたため、上流 marketplace から取得する。
     extraKnownMarketplaces = {
+      googlechrome.source = {
+        source = "github";
+        repo = "GoogleChrome/modern-web-guidance";
+      };
       # fetchFromGitHub で rev 固定しない理由: 更新頻度が高く hash 追従の手間に
       # 見合わないため、FORCE_AUTOUPDATE_PLUGINS で上流に追従させる。
       natural-japanese.source = {
@@ -159,6 +170,14 @@ let
       # 個別 marketplace の auto-update on/off は /plugin UI で別途 toggle する必要あり。
       FORCE_AUTOUPDATE_PLUGINS = "1";
       CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+      # Code Mode (experimental): Claude が個別の tool 呼び出しの代わりに
+      # JavaScript を書いて複数の tool 呼び出しを 1 ステップで実行するモード。
+      # project の settings.json ではなく user settings 側で指定している理由:
+      # clone したリポジトリが勝手に Code Mode を有効化できないよう、
+      # Claude Code は project settings の env にあるこの変数を無視する。
+      # agent teams と併用するには v2.1.326 以降が必要
+      # (overlays/claude-code-manifest.json 側で担保)。
+      CLAUDE_CODE_EXPERIMENTAL_CODE_MODE = "1";
       CLAUDE_CODE_NO_FLICKER = "1";
       # 下の effortLevel ではなく環境変数で指定している理由:
       # Claude Code 2.1.210 時点では settings.json の effortLevel が effort に反映されず、
@@ -170,6 +189,10 @@ let
       # AWS_PROFILE = "jp-sandbox";
       # ANTHROPIC_MODEL = "jp.anthropic.claude-sonnet-4-5-20250929-v1:0";
       # AWS_REGION = "ap-northeast-1";
+    }
+    // config._claude.extraEnv
+    // lib.optionalAttrs (config._claude.pluginDir != null) {
+      CLAUDE_CODE_PLUGIN_DIRS = "${claudeDir}/${config._claude.pluginDir}";
     };
     permissions = {
       allow = basePermissions ++ config._claude.extraPermissions;
@@ -211,7 +234,11 @@ in
   options._claude = {
     model = lib.mkOption {
       type = lib.types.str;
-      default = "claude-opus-5";
+      # claude-opus-5 のままにしない理由: Code Mode (experimental) は
+      # Opus 5.5 / Sonnet 5.5 / Haiku 5.5 / Fable 5.2 以降でしか起動せず、
+      # claude-opus-5 では "it only works with Opus 5.5, Sonnet 5.5 and
+      # later models" で無効化される。
+      default = "claude-opus-5-5";
       description = "Claude Code のデフォルトモデル ID";
     };
     effortLevel = lib.mkOption {
@@ -234,6 +261,29 @@ in
       default = {};
       description = "プロファイル固有の Claude Code hooks（settings.json の hooks に merge される）";
     };
+    extraEnv = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = {};
+      description = "プロファイル固有の環境変数（settings.json の env に merge される）";
+    };
+    extraFiles = lib.mkOption {
+      type = lib.types.attrsOf lib.types.attrs;
+      default = {};
+      description = ''
+        claude 設定ディレクトリ配下へ配置する追加ファイル。
+        キーは設定ディレクトリからの相対パスで、.claude と .claude-private の両方へ展開される。
+      '';
+    };
+    # listOf ではなく単一値にしている理由: CLAUDE_CODE_PLUGIN_DIRS の区切り文字を
+    # 実機で確認できていない。moshi-plugin 1 つで足りる間は曖昧さを持ち込まない。
+    pluginDir = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = ''
+        CLAUDE_CODE_PLUGIN_DIRS へ渡すプラグインディレクトリ。
+        claude 設定ディレクトリからの相対パスで指定し、root ごとに絶対パスへ展開される。
+      '';
+    };
   };
 
   config = {
@@ -249,9 +299,9 @@ in
     home.file =
       let
         # ベース定義（".claude/" prefix なし）。これを各 root に展開する。
-        baseFiles = {
+        baseFiles = claudeDir: {
           "CLAUDE.md".source = ./claude-md/CLAUDE.md;
-          "settings.json".source = settingsJson;
+          "settings.json".source = mkSettingsJson claudeDir;
           # nix attrset に変換せず JSON 原文を置く理由: powerline.owloops.com が
           # 生成する設定で、再編集は GUI への貼り付け往復になるため。
           # .claude-private 側にも置く理由: v1.30.3 の探索パスは
@@ -268,11 +318,12 @@ in
             ) gwsSkills.skillFiles)
         // (lib.mapAttrs' (n: v:
               lib.nameValuePair (lib.removePrefix ".claude/" n) v
-            ) yutauraRules.ruleFiles);
+            ) yutauraRules.ruleFiles)
+        // config._claude.extraFiles;
 
         withRoot = root: lib.mapAttrs' (n: v:
           lib.nameValuePair "${root}/${n}" v
-        ) baseFiles;
+        ) (baseFiles "${config.home.homeDirectory}/${root}");
       in
         withRoot ".claude" // withRoot ".claude-private";
   };

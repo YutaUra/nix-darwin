@@ -163,15 +163,44 @@ in
   # settings.json は home-manager 管理の read-only symlink のため moshi-hook install は使えない。
   # 各イベントで `moshi-hook claude-hook` を呼び、承認待ちやターン完了を iPhone の Moshi に通知する。
   # 生成物の正確な形は moshi-hook install の出力に準拠（moshi-hook のバージョン更新時は要再確認）。
+  # moshi-hook が claude 設定ディレクトリへ生成するファイルを宣言的に転記する。
+  # moshi-hook は register.ts と SKILL.md をバイト単位で現行 installer 出力と比較するため、
+  # moshi-hook を上げたら
+  #   CLAUDE_CONFIG_DIR=<一時dir> moshi-hook install --target claude
+  # を実行して moshi-claude/ 配下を取り直し、差分を確認すること
+  # （moshi-hook status --json が target claude を current と報告すれば一致している）。
+  _claude.pluginDir = "moshi-plugin";
+  _claude.extraFiles = {
+    "moshi-plugin/.claude-plugin/plugin.json".source =
+      ./moshi-claude/moshi-plugin/.claude-plugin/plugin.json;
+    "moshi-plugin/hooks/hooks.json".source = ./moshi-claude/moshi-plugin/hooks/hooks.json;
+    # register.ts だけ原文をそのまま置けない理由: moshi-hook の絶対パスが焼き込まれるため、
+    # placeholder 化した .in から差し替えて生成する。
+    "moshi-plugin/hooks/register.ts".source = pkgs.writeText "register.ts" (
+      builtins.replaceStrings
+        [ "@moshiHook@" ]
+        [ "${config.home.profileDirectory}/bin/moshi-hook" ]
+        (builtins.readFile ./moshi-claude/moshi-plugin/hooks/register.ts.in)
+    );
+    "skills/moshi-visuals/SKILL.md".source = ./moshi-claude/skills/moshi-visuals/SKILL.md;
+  };
+
   _claude.extraHooks =
     let
-      cmd = "${moshi-hook}/bin/moshi-hook claude-hook";
+      # command に ${moshi-hook}/bin ではなく profileDirectory を使う理由:
+      # moshi-hook は settings.json の command 文字列を自分の installer 出力と完全一致で
+      # 比較して「自分が入れた hook か」を判定する。store パスだと moshi-hook を上げる
+      # たびにパスが変わって常に未インストール扱いになり、inbox と Chat View が無効化される。
+      # profileDirectory は nix が管理する安定パスなので宣言性は失われない。
+      # シングルクォートも installer 出力の一部なので省略できない。
+      cmd = "'${config.home.profileDirectory}/bin/moshi-hook' claude-hook";
       hook = async: { inherit async; type = "command"; command = cmd; };
       entry = async: [{ hooks = [ (hook async) ]; }];
       matched = matcher: { inherit matcher; hooks = [ (hook true) ]; };
     in {
       # 承認要求だけは同期(async=false)で処理し、承認ラウンドトリップを成立させる。
       PermissionRequest = [{ hooks = [ (hook false) ]; }];
+      Notification = [ (matched "permission_prompt") ];
       PreToolUse = [ (matched "AskUserQuestion") (matched "ExitPlanMode") ];
       PostToolUse = [ (matched "AskUserQuestion") (matched "ExitPlanMode") ];
       SessionStart = entry true;

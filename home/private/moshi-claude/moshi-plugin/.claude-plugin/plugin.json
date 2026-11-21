@@ -1,0 +1,6 @@
+{
+  "name": "moshi-hook",
+  "version": "1.0.0",
+  "description": "Forwards Claude Code's next-prompt suggestion to Moshi Chat View",
+  "author": { "name": "Moshi" }
+}

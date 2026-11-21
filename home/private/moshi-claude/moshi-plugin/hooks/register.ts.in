@@ -1,0 +1,56 @@
+import type { Engine, Register } from 'claude-code'
+
+// Written by `moshi-hook install claude`; reinstalling overwrites it.
+//
+// Forwards the dim next-prompt suggestion Claude Code shows in its empty
+// prompt box to moshi-hook, so Chat View can offer the same text. The TUI's
+// own behaviour is untouched: every hook passes the event on with next(e).
+const HELPER = "@moshiHook@"
+
+// Set while a forwarded suggestion may still be showing, so only the first
+// edit of the prompt box after it reports the clear.
+let isForwarded = false
+
+// Forwards run one at a time in event order: a clear that overtook its
+// suggestion would leave moshi offering text the TUI already dropped.
+let queue: Promise<void> = Promise.resolve()
+
+function forward($: Engine, event: string, text: string) {
+  // Read now, while the session is the one that raised the event.
+  const sessionId = $.session.id()
+  sessionId.catch(() => {}) // awaited (and its failure handled) in send
+  // Stamped now, not when the helper runs: a forward that waited behind
+  // others must not look newer than a prompt submitted in the meantime.
+  const at = Date.now() / 1000
+  queue = queue.then(() => send($, sessionId, event, text, at))
+}
+
+async function send($: Engine, sessionId: Promise<string>, event: string, text: string, at: number) {
+  try {
+    const session_id = await sessionId
+    const stdin = JSON.stringify({ hook_event_name: event, session_id, text, at })
+    await $.process.run([HELPER, 'claude-hook'], { stdin, timeoutMs: 10000 })
+  } catch {
+    // moshi-hook missing or slow: Chat View just goes without the suggestion.
+  }
+}
+
+export const register: Register = on => {
+  on('prompt.suggest', async ($, e, next) => {
+    const shown = await next(e)
+    if (shown.isShown) {
+      isForwarded = true
+      forward($, 'MoshiPromptSuggestion', e.text)
+    }
+    return shown
+  })
+
+  on('prompt.edit', async ($, e, next) => {
+    const box = await next(e)
+    if (isForwarded) {
+      isForwarded = false
+      forward($, 'MoshiPromptSuggestionCleared', '')
+    }
+    return box
+  })
+}
