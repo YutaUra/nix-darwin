@@ -1,8 +1,15 @@
 # llm を nixpkgs の pkgs.llm ではなく自前で組み上げる理由:
 # llm-openai-decisions は llm>=0.36 を要求し（llm.parts モジュールは 0.36 で追加された）、
-# llm 0.36 は openai>3 を要求する。一方 nixpkgs-unstable は llm 0.31.1 / openai 2.53.0 で
-# 止まっているため、llm・openai・プラグインの 3 つを PyPI sdist から作る必要がある。
+# nixpkgs-unstable の llm は 0.35 で止まっているため、llm とプラグインを PyPI sdist から作る。
 # いずれも pure Python なのでコンパイルは発生しない。
+#
+# openai を override しない理由:
+# llm 0.36 は openai>3 を要求する。nixpkgs が openai 2.53.0 だった頃は 3.3.0 への
+# override が必要だったが、nixpkgs が 3.14.1 へ追従したため不要になった。
+# override を残すと base（nixpkgs の openai）の build-system をそのまま継承するため、
+# nixpkgs 側が openai 3.14 系に合わせて build-system を hatchling のみへ減らした時点で、
+# 3.3.0 が要求する hatch-fancy-pypi-readme がビルド環境から欠けて落ちる。
+# 同じ理由で、将来 openai を再びピンしたくなった場合は build-system も明示すること。
 #
 # pkgs.llm.withPlugins を使わない理由:
 # withPlugins の引数は nixpkgs 収録済みプラグイン名の固定リストで、out-of-tree の
@@ -12,46 +19,6 @@
 
 let
   ps = python3Packages;
-
-  # llm 0.36 の `openai>3`（PEP 440 では 3.0.0 を含まない）を満たす最小の版。
-  #
-  # 3.3.1 以降を選ばない理由: jiter>=0.16 を要求し、Rust 製の jiter を上書きビルドする
-  # ことになる。3.3.0 は jiter>=0.10 / httpx2>=2.7 のため nixpkgs 側をそのまま使える。
-  openai = ps.openai.overridePythonAttrs (old: rec {
-    version = "3.3.0";
-
-    src = fetchPypi {
-      pname = "openai";
-      inherit version;
-      hash = "sha256-KPkEqfv/FSiOndZ7wPcCDU9XbTd4Y4OkgNsC/l2BOdM=";
-    };
-
-    # openai 3.x は httpx を httpx2 へ移し tqdm への依存をやめた（distro は 3.3.0 では
-    # まだ必要）。nixpkgs の 2.53.0 向けリストは実体と合わないため置き換える。
-    dependencies = with ps; [
-      anyio
-      distro
-      httpx2
-      jiter
-      pydantic
-      sniffio
-      typing-extensions
-    ];
-
-    # pyproject は hatchling を ==1.26.3 に固定するが nixpkgs は 1.31.0 のみ。
-    postPatch = ''
-      substituteInPlace pyproject.toml \
-        --replace-fail 'hatchling==1.26.3' 'hatchling'
-    '';
-
-    # nixpkgs のテスト設定は httpx ベースのモック（respx）依存で、httpx2 へ移行した 3.x では成立しない。
-    doCheck = false;
-
-    # nixpkgs 側は fetchFromGitHub の tag を参照しているため、fetchPypi に差し替えると評価が落ちる。
-    meta = old.meta // {
-      changelog = "https://github.com/openai/openai-python/blob/v${version}/CHANGELOG.md";
-    };
-  });
 
   llm = ps.buildPythonPackage (finalAttrs: {
     pname = "llm";
@@ -65,11 +32,12 @@ let
 
     build-system = [ ps.setuptools ];
 
-    dependencies = [ openai ] ++ (with ps; [
+    dependencies = with ps; [
       click
       click-default-group
       condense-json
       httpx2
+      openai
       pip
       pluggy
       puremagic
@@ -79,7 +47,7 @@ let
       setuptools
       sqlite-utils
       typing-extensions
-    ]);
+    ];
 
     # sdist にテストが含まれないため doCheck は立てられない。
     doCheck = false;
@@ -110,11 +78,6 @@ let
       httpx2
       pydantic
     ]);
-
-    # httpx2 の下限（>=2.13.0）を緩める理由: 2.13.1 へ上げると httpcore2==2.13.1 の同時更新を
-    # 伴い httpx2 依存パッケージ全体を再ビルドする。プラグインが使う API は
-    # Client(timeout, follow_redirects) / AsyncClient / HTTPError だけで 2.9.1 に存在する。
-    pythonRelaxDeps = [ "httpx2" ];
 
     # dev 依存の httpx2-pytest が nixpkgs 未収録。
     doCheck = false;
