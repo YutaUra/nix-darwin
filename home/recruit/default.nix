@@ -24,9 +24,6 @@ in
     kustomize
     argocd
 
-    # Python
-    uv
-
     # Go
     go
 

@@ -139,7 +139,18 @@ let
       "greptile@claude-plugins-official" = false;
       "document-skills@anthropic-agent-skills" = true;
       "yutaura-toolkit@yutaura-marketplace" = true;
+      "natural-japanese@natural-japanese" = true;
     } // config._claude.extraPlugins;
+    # /plugin marketplace add を手で打たずに宣言する理由: 新しい K8s コンテナでも
+    # 初回起動時に marketplace が自動登録され、プロファイル間で状態がずれない。
+    extraKnownMarketplaces = {
+      # fetchFromGitHub で rev 固定しない理由: 更新頻度が高く hash 追従の手間に
+      # 見合わないため、FORCE_AUTOUPDATE_PLUGINS で上流に追従させる。
+      natural-japanese.source = {
+        source = "github";
+        repo = "coji/natural-japanese";
+      };
+    };
     env = {
       CLAUDE_CODE_DISABLE_AUTO_MEMORY = "1";
       DISABLE_AUTOUPDATER = "1";
@@ -226,7 +237,9 @@ in
   };
 
   config = {
-    home.packages = [ playwright-cli ];
+    # uv を common に置く理由: natural-japanese skill の lint.py は PEP 723 形式で
+    # `uv run` 前提のため、uv が無い環境では検出工程が丸ごと動かない。
+    home.packages = [ playwright-cli pkgs.uv ];
 
     # ~/.claude と ~/.claude-private の双方に同一内容を配置する理由:
     # 個人アカウント用の設定ディレクトリを CLAUDE_CONFIG_DIR=~/.claude-private で
