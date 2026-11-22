@@ -289,7 +289,9 @@ in
   config = {
     # uv を common に置く理由: natural-japanese skill の lint.py は PEP 723 形式で
     # `uv run` 前提のため、uv が無い環境では検出工程が丸ごと動かない。
-    home.packages = [ playwright-cli pkgs.uv ];
+    # pkgs.typescript を入れない理由: typescript-language-server は fallback に typescript_5 の
+    # tsserver を焼き込み済みで、pkgs.typescript (7.x) は tsserver.js を前提にできない。
+    home.packages = [ playwright-cli pkgs.uv pkgs.typescript-language-server ];
 
     # ~/.claude と ~/.claude-private の双方に同一内容を配置する理由:
     # 個人アカウント用の設定ディレクトリを CLAUDE_CONFIG_DIR=~/.claude-private で
