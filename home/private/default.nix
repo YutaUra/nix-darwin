@@ -3,6 +3,23 @@ let
   # moshi-hook は nixpkgs に無いためビルド済みバイナリを自前パッケージ化している（pkgs/moshi-hook.nix）。
   moshi-hook = pkgs.callPackage ../../pkgs/moshi-hook.nix { };
   llm-with-decisions = pkgs.callPackage ../../pkgs/llm-with-decisions.nix { };
+
+  # register.ts だけ原文をそのまま置けない理由: moshi-hook の絶対パスが焼き込まれるため、
+  # placeholder 化した .in から差し替えて生成する。
+  moshiRegisterTs = pkgs.writeText "register.ts" (
+    builtins.replaceStrings
+      [ "@moshiHook@" ]
+      [ "${config.home.profileDirectory}/bin/moshi-hook" ]
+      (builtins.readFile ./moshi-claude/moshi-plugin/hooks/register.ts.in)
+  );
+  # symlink を並べた symlinkJoin ではなく cp で実体化する理由: plugin ディレクトリ内の
+  # ファイルが別の store path へ解決されると、Claude Code が読み込みを拒否するため。
+  moshiPlugin = pkgs.runCommand "moshi-plugin" { } ''
+    mkdir -p $out/.claude-plugin $out/hooks
+    cp ${./moshi-claude/moshi-plugin/.claude-plugin/plugin.json} $out/.claude-plugin/plugin.json
+    cp ${./moshi-claude/moshi-plugin/hooks/hooks.json} $out/hooks/hooks.json
+    cp ${moshiRegisterTs} $out/hooks/register.ts
+  '';
 in
 {
   imports = [
@@ -171,17 +188,9 @@ in
   # （moshi-hook status --json が target claude を current と報告すれば一致している）。
   _claude.pluginDir = "moshi-plugin";
   _claude.extraFiles = {
-    "moshi-plugin/.claude-plugin/plugin.json".source =
-      ./moshi-claude/moshi-plugin/.claude-plugin/plugin.json;
-    "moshi-plugin/hooks/hooks.json".source = ./moshi-claude/moshi-plugin/hooks/hooks.json;
-    # register.ts だけ原文をそのまま置けない理由: moshi-hook の絶対パスが焼き込まれるため、
-    # placeholder 化した .in から差し替えて生成する。
-    "moshi-plugin/hooks/register.ts".source = pkgs.writeText "register.ts" (
-      builtins.replaceStrings
-        [ "@moshiHook@" ]
-        [ "${config.home.profileDirectory}/bin/moshi-hook" ]
-        (builtins.readFile ./moshi-claude/moshi-plugin/hooks/register.ts.in)
-    );
+    # ファイル単位で置かない理由: 実体が plugin ディレクトリ外へ解決され Claude Code が読み込まない。
+    # PLUGIN_DIRS を store path に向けない理由: moshi-hook がパスを文字列比較し未インストール扱いになる。
+    "moshi-plugin".source = moshiPlugin;
     "skills/moshi-visuals/SKILL.md".source = ./moshi-claude/skills/moshi-visuals/SKILL.md;
   };
 
