@@ -36,6 +36,9 @@
     # こちらの nixpkgs（Go 1.26.8）へ寄せると解消し、nixpkgs の二重取り込みも防げる。
     beads.url = "github:gastownhall/beads";
     beads.inputs.nixpkgs.follows = "nixpkgs";
+    # github-runner だけ旧 rev に固定する理由: b758f16 以降は依存の swift-collections 1.7.6 が
+    # darwin で headerpad 不足により落ち、Hydra にもキャッシュが無い。nixpkgs 側が直ったら削除する。
+    nixpkgs-github-runner.url = "github:NixOS/nixpkgs/1c872b8c508bbbfebc1b0b74777ff391ce0a574c";
   };
 
   outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, nix-homebrew, zyouz, ... }:
@@ -87,7 +90,7 @@
           inherit system;
           specialArgs = { inherit username configName; };
           modules = [
-            { nixpkgs.overlays = [ (import ./overlays/claude-code.nix) (import ./overlays/gws.nix) (import ./overlays/claudia.nix) (import ./overlays/logq.nix) (_: _: { gati = inputs.gati.packages.${system}.default; zyouz = inputs.zyouz.packages.${system}.default; herdr = inputs.herdr.packages.${system}.default; beads = inputs.beads.packages.${system}.default; }) ]; }
+            { nixpkgs.overlays = [ (import ./overlays/claude-code.nix) (import ./overlays/gws.nix) (import ./overlays/claudia.nix) (import ./overlays/logq.nix) (_: _: { gati = inputs.gati.packages.${system}.default; zyouz = inputs.zyouz.packages.${system}.default; herdr = inputs.herdr.packages.${system}.default; beads = inputs.beads.packages.${system}.default; github-runner = inputs.nixpkgs-github-runner.legacyPackages.${system}.github-runner; }) ]; }
             ./hosts/${hostname}/default.nix
             nix-homebrew.darwinModules.nix-homebrew
             {
