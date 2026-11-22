@@ -1,5 +1,5 @@
 # Gas Town（gt）本体と周辺依存（beads / dolt / tmux / shell 連携）の一式。
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, ... }:
 let
   # 上流 flake が HEAD に追従できずビルド不能なため自前パッケージ化している（理由は pkgs/gastown.nix）。
   gastown = pkgs.callPackage ../../pkgs/gastown.nix { };
@@ -15,19 +15,6 @@ let
     mkdir -p "$HOME"
     ${gastown}/bin/gt shell install > /dev/null 2>&1 || true
     cp "$HOME/.config/gastown/shell-hook.sh" "$out"
-  '';
-
-  # `gt install ~/gt` で作る HQ と一致させる必要がある。
-  townRoot = "${config.home.homeDirectory}/gt";
-
-  # daemon を launchd へ直接渡さずラッパーを挟む理由:
-  #   - town 未作成だと gt daemon run は即失敗し、KeepAlive.Crashed = true で crash loop になる
-  #   - StandardOutPath の親が無いと launchd は spawn 自体に失敗する
-  #     （town/daemon/ は daemon の初回起動時に作られるので gt install 直後は存在しない）
-  gastownDaemonGuard = pkgs.writeShellScript "gastown-daemon-guard" ''
-    [ -d "${townRoot}/mayor" ] || exit 0
-    mkdir -p "${townRoot}/daemon"
-    exec ${gastown}/bin/gt daemon run
   '';
 in
 {
@@ -72,29 +59,4 @@ in
           || echo "warning: gt enable に失敗しました" >&2
       fi
     '';
-
-  # 上流 `gt install --supervisor` が置く com.gastown.daemon.plist を宣言で再現したもの。
-  # plist を gt に書かせない理由: nix 管理外の生成物が ~/Library/LaunchAgents に残り、
-  # home-manager の世代管理から外れる（moshi-hook と同じ方針）。
-  # 常駐させる判断: ログイン時から patrol が回り続け、rig 登録後はエージェント作業も
-  # 自走してトークンを継続消費しうる。手動運用に戻すときはこのブロックを外す。
-  launchd.agents.gastown-daemon = {
-    enable = true;
-    config = {
-      ProgramArguments = [ "${gastownDaemonGuard}" ];
-      WorkingDirectory = townRoot;
-      RunAtLoad = true;
-      KeepAlive = {
-        Crashed = true;
-        SuccessfulExit = false;
-      };
-      StandardOutPath = "${townRoot}/daemon/daemon.log";
-      StandardErrorPath = "${townRoot}/daemon/daemon.log";
-      EnvironmentVariables = {
-        GT_TOWN_ROOT = townRoot;
-        PATH = "${config.home.profileDirectory}/bin:/usr/bin:/bin:/usr/sbin:/sbin";
-      };
-      ProcessType = "Background";
-    };
-  };
 }
