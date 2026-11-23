@@ -65,6 +65,7 @@
     enable = true;
     extensions = with pkgs; [
       gh-stack
+      gh-actions-lock
     ];
     # 既存の ~/.config/gh/config.yml にあった設定を宣言に取り込んだもの。
     # hosts.yml（認証情報）は home-manager 管理外なのでそのまま残る。
