@@ -62,7 +62,7 @@ home-manager switch --flake .#qall-k8s
 
 **Claude は原則としてビルド（`darwin-rebuild build` / `nix build`）を実行しない。**
 
-このリポジトリは Rust 製ツール（claudia, logq, gati, zyouz, herdr, moshi-hook）を
+このリポジトリは Rust 製ツール（claudia, gws, herdr）を
 ソースからビルドするため、build はキャッシュミス時に CPU を数分〜数十分占有し、
 作業中のマシンの体感速度を大きく損なう。
 
@@ -71,12 +71,18 @@ home-manager switch --flake .#qall-k8s
 | レベル | コマンド | 検出できるもの | コスト |
 |---|---|---|---|
 | L0 構文 | `nix-instantiate --parse <変更した>.nix` | 構文エラー | 一瞬 |
-| L1 評価 | `nix eval --raw '.#darwinConfigurations.<profile>.config.system.build.toplevel.drvPath'` | option 名タイポ、型不一致、未定義 attribute、import 漏れ、`git add` 忘れ | コンパイルなし |
+| L1 評価 | `taskpolicy -b nix eval --raw '.#darwinConfigurations.<profile>.config.system.build.toplevel.drvPath'` | option 名タイポ、型不一致、未定義 attribute、import 漏れ、`git add` 忘れ | コンパイルなし（1 回あたり CPU 数秒〜数十秒・メモリ約 2GB） |
 | L2 ビルド | `darwin-rebuild build --flake '.#<profile>'` | 実際のビルド失敗のみ | 高 CPU |
 
 - 既定は **L0 → L1 まで**。Nix は評価と実現が分離しており、設定の誤りは L1 で落ちる
 - **L2 はユーザーが明示的に「ビルドして」と言った場合のみ**実行する。自発的に走らせない
-- home-manager 側は `nix eval --raw '.#homeConfigurations.qall-k8s.activationPackage.drvPath'`
+- home-manager 側は `taskpolicy -b nix eval --raw '.#homeConfigurations.qall-k8s.activationPackage.drvPath'`
+- L1 は必ず `taskpolicy -b` を付けて実行する。macOS の background QoS で高効率コアに寄せ、
+  I/O 優先度も下げるため、作業中のマシンがカクつかない
+- L1 は**変更の影響を受けるプロファイルだけ**評価する。全プロファイルの一括評価はしない
+  - `common/`・`home/common/` → private と recruit（qall-k8s は `home/qall-k8s/default.nix` が import しているファイルを変えたときだけ）
+  - `profiles/<name>/`・`hosts/<name>/`・`home/<name>/` → そのプロファイルだけ
+  - `flake.nix`・`flake.lock`・`overlays/` → 影響する全プロファイル
 - 新規パッケージ追加・overlay の rev 変更など評価では検出できない変更をした場合は、
   「L1 は通ったが実ビルドは未検証」と明示して報告し、ビルドするかの判断をユーザーに委ねる
 - L2 を回すときは `--max-jobs 2 --cores 4` 等で CPU を絞る

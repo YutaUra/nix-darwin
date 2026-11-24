@@ -118,7 +118,6 @@ in
     ripgrep
     duckdb
     gh
-    gati
 
     # Kubernetes
     argocd

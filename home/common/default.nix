@@ -8,7 +8,6 @@
     ./direnv.nix
     ./lazygit.nix
     ./zellij.nix
-    ./zyouz.nix
     ./herdr.nix
     ./gws.nix
   ];
@@ -34,7 +33,6 @@
 
     # 開発ツール
     claude-code
-    gati
     google-cloud-sdk
     zed-editor
 

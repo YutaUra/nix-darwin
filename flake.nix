@@ -11,8 +11,6 @@
     # 再生成されており HOMEBREW_ORIGINAL_BREW_FILE の export を欠くため、
     # brew bundle が `key not found` で落ちる。上流が tail を直したら追従に戻す。
     nix-homebrew.url = "github:zhaofengli/nix-homebrew/09a921d0181146cf6163ec2cc1db7b6fd539a885";
-    gati.url = "github:YutaUra/gati";
-    zyouz.url = "github:YutaUra/zyouz";
     # herdr は nixpkgs を nixos-unstable にピンしているが follows 未宣言のため、
     # こちらから追従させて nixpkgs の二重取り込みを防ぐ（単体バイナリなので安全）。
     herdr.url = "github:ogulcancelik/herdr";
@@ -41,7 +39,7 @@
     nixpkgs-github-runner.url = "github:NixOS/nixpkgs/1c872b8c508bbbfebc1b0b74777ff391ce0a574c";
   };
 
-  outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, nix-homebrew, zyouz, ... }:
+  outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, nix-homebrew, ... }:
     let
       # herdr が静的リンクする Zig 製 libghostty-vt の compiler_rt.o には ld.bfd が
       # 解決できないリロケーションが .debug_loc と .eh_frame に残っており、GCC 16 を
@@ -84,14 +82,35 @@
         };
       };
 
+      # flake input のソース（nixpkgs 等）を GC から守るためのモジュール。
+      # 評価にしか使わないソースはシステムの closure に入らないため、Determinate Nix の
+      # 自動 GC に消され、次の評価で数万ファイルの再ダウンロード・展開・ハッシュ計算が走る。
+      #
+      # system.extraDependencies を使わない理由: NixOS にしか無く nix-darwin には存在しない。
+      # 代わりに /etc のファイルへストアパスを埋め込み、文字列 context 経由で実行時依存にする。
+      # 推移的な input まで辿る理由: herdr の rust-overlay のような子 input も評価に使われ、
+      # 直下の input だけでは同じ再取得が起きるため。
+      retainFlakeInputs = { lib, ... }:
+        let
+          collect = ins:
+            lib.concatMap
+              (input: [ input.outPath ] ++ lib.optionals (input ? inputs) (collect (removeAttrs input.inputs [ "self" ])))
+              (builtins.attrValues ins);
+        in
+        {
+          environment.etc."flake-inputs".text =
+            lib.concatStringsSep "\n" (lib.unique (collect (removeAttrs inputs [ "self" ]))) + "\n";
+        };
+
       mkDarwin = { hostname, username, profile, extraModules ? [ ], system ? "aarch64-darwin" }:
         let configName = profile; in
         nix-darwin.lib.darwinSystem {
           inherit system;
           specialArgs = { inherit username configName; };
           modules = [
-            { nixpkgs.overlays = [ (import ./overlays/claude-code.nix) (import ./overlays/gws.nix) (import ./overlays/claudia.nix) (import ./overlays/logq.nix) (_: _: { gati = inputs.gati.packages.${system}.default; zyouz = inputs.zyouz.packages.${system}.default; herdr = inputs.herdr.packages.${system}.default; beads = inputs.beads.packages.${system}.default; github-runner = inputs.nixpkgs-github-runner.legacyPackages.${system}.github-runner; }) ]; }
+            { nixpkgs.overlays = [ (import ./overlays/claude-code.nix) (import ./overlays/gws.nix) (import ./overlays/claudia.nix) (import ./overlays/logq.nix) (_: _: { herdr = inputs.herdr.packages.${system}.default; beads = inputs.beads.packages.${system}.default; github-runner = inputs.nixpkgs-github-runner.legacyPackages.${system}.github-runner; }) ]; }
             ./hosts/${hostname}/default.nix
+            retainFlakeInputs
             nix-homebrew.darwinModules.nix-homebrew
             {
               nix-homebrew = {
@@ -108,7 +127,6 @@
               home-manager.extraSpecialArgs = { inherit username; inherit (inputs) herdr-plugin-hunk; };
               home-manager.users.${username} = {
                 imports = [
-                  zyouz.homeManagerModules.default
                   ./home/common/default.nix
                   ./home/${profile}/default.nix
                 ];
@@ -141,16 +159,12 @@
             (import ./overlays/claude-code.nix)
             (import ./overlays/gws.nix)
             (final: _: {
-              # コンテナ環境では TTY がなく gati のテストが失敗するため doCheck を無効化
-              gati = inputs.gati.packages.aarch64-linux.default.overrideAttrs { doCheck = false; };
-              zyouz = inputs.zyouz.packages.aarch64-linux.default;
               herdr = herdrLinkedWithLld final;
             })
           ];
         };
         extraSpecialArgs = { inherit (inputs) herdr-plugin-hunk; };
         modules = [
-          zyouz.homeManagerModules.default
           ./home/qall-k8s/default.nix
           {
             home.username = "quipper";
