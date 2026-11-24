@@ -19,7 +19,7 @@ let
 in
 {
   imports = [
-    # `gt up` と tmux ベースの役割が tmux 3.0+ を必須とする。普段は zellij と herdr で
+    # `gt up` と tmux ベースの役割が tmux 3.0+ を必須とする。普段は herdr で
     # 足りているが、gastown はセッション一覧・pane 操作を tmux に直接依存していて代替不可。
     ../common/tmux.nix
   ];

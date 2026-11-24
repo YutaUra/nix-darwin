@@ -7,7 +7,6 @@
     ./claude-code.nix
     ./direnv.nix
     ./lazygit.nix
-    ./zellij.nix
     ./herdr.nix
     ./gws.nix
   ];
