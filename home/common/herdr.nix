@@ -1,4 +1,4 @@
-{ pkgs, lib, config, herdr-plugin-hunk, ... }:
+{ pkgs, lib, config, herdr-plugin-hunk, herdr-src, ... }:
 let
   # プラグイン実体は nix store のパスとして link する。
   # store パスにする理由: 登録される実体が現在の home generation の内容に固定され、
@@ -10,6 +10,14 @@ let
   # in-repo の worktree-include と違いリモート由来なので、実体は flake.lock で
   # バージョン固定された store パスになる。
   hunkPlugin = herdr-plugin-hunk;
+
+  # herdr の native agent session restore 用 Claude Code hook。
+  # `herdr integration install claude` を使わない理由: settings.json は nix store への
+  # read-only symlink なので書き込めず、書けても次の switch で消える。
+  # flake input のソースから取る理由: herdr を上げるとスクリプトの版も自動で追従し、
+  # `herdr integration status` が outdated にならない。
+  # パスを herdr の既定と揃える理由: status は既定パスのファイルで導入状態を判定する。
+  claudeHookPath = "${config.home.homeDirectory}/.claude/hooks/herdr-agent-state.sh";
 in
 {
   # プロファイル固有の config.toml 追記枠（_claude.extraPlugins と同じ方式）。
@@ -25,6 +33,20 @@ in
   };
 
   config = {
+    home.file.".claude/hooks/herdr-agent-state.sh".source =
+      "${herdr-src}/src/integration/assets/claude/herdr-agent-state.sh";
+
+    # matcher とコマンド形式は herdr の installer（src/integration/claude_settings.rs）の出力に揃える。
+    # ~/.claude-private 側の settings.json にも同じ hook が入るが、スクリプトは共通の 1 つでよい。
+    _claude.extraHooks.SessionStart = [{
+      matcher = "^(startup|resume|clear|compact|fork)$";
+      hooks = [{
+        type = "command";
+        command = "bash '${claudeHookPath}' session";
+        timeout = 10;
+      }];
+    }];
+
     # config.toml は herdr が通常書き込まないユーザー所有ファイルなので、plugins.json と違い
     # nix store への symlink として直接配置してよい（plugins.json は herdr 管理のため link 方式）。
     home.file.".config/herdr/config.toml".source = pkgs.writeText "herdr-config.toml" (

@@ -257,7 +257,9 @@ in
       description = "プロファイル固有の Claude Code プラグイン";
     };
     extraHooks = lib.mkOption {
-      type = lib.types.attrs;
+      # types.attrs にしない理由: 複数モジュールが同じイベント（SessionStart 等）を定義すると
+      # 浅いマージで後勝ちになり、片方の hook が黙って消える。listOf なら連結される。
+      type = lib.types.attrsOf (lib.types.listOf lib.types.attrs);
       default = {};
       description = "プロファイル固有の Claude Code hooks（settings.json の hooks に merge される）";
     };

@@ -124,7 +124,7 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.backupFileExtension = "before-nix";
-              home-manager.extraSpecialArgs = { inherit username; inherit (inputs) herdr-plugin-hunk; };
+              home-manager.extraSpecialArgs = { inherit username; inherit (inputs) herdr-plugin-hunk; herdr-src = inputs.herdr; };
               home-manager.users.${username} = {
                 imports = [
                   ./home/common/default.nix
@@ -163,7 +163,7 @@
             })
           ];
         };
-        extraSpecialArgs = { inherit (inputs) herdr-plugin-hunk; };
+        extraSpecialArgs = { inherit (inputs) herdr-plugin-hunk; herdr-src = inputs.herdr; };
         modules = [
           ./home/qall-k8s/default.nix
           {
