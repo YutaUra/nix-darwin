@@ -12,6 +12,19 @@
 # 未設定は未完了扱い（onboarding.unwrap_or(true)）で毎回表示されるため明示する。
 onboarding = false
 
+[session]
+# server 再起動（PC 再起動含む）後に、session ref を申告済みの AI エージェント pane を
+# `claude --resume <id>` 相当で復元する。herdr の既定でも true だが、復元されることを
+# 前提に運用するので明示する。申告は home/common/herdr.nix が入れる Claude Code の
+# SessionStart hook が行う（hook が無い pane は素のシェルとして復元される）。
+resume_agents_on_restore = true
+
+# [experimental] pane_history を有効化しない理由:
+# native agent session restore が効く pane では画面履歴の replay は行われないため
+# （claude 自身が会話を再描画する）、得られるのは素のシェル pane の画面だけ。
+# 一方で全 pane のスクロールバックが session-history.json に平文で残り、
+# トークンやコマンド出力がバックアップにも乗る。割に合わないので既定の off のままにする。
+
 [keys]
 # プレフィックスキーは既定の ctrl+b のまま（明示不要）。
 # 既定バインドと衝突しないキーを custom command に割り当てる。
