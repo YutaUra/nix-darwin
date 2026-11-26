@@ -76,6 +76,7 @@ in
     "yutaura-tools@sapuri-agent-plugins" = true;
     "k12-manage-web-devs@sapuri-agent-plugins" = true;
     "recpedia@sapuri-agent-plugins" = true;
+    "cisco-vpn@sapuri-agent-plugins" = true;
   };
 
   # aqua (aquaproj/aqua) でインストールされた CLI を PATH に追加する

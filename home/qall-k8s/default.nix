@@ -53,6 +53,7 @@ in
     "figma-implementation-core@sapuri-agent-plugins" = true;
     "k12-manage-web-devs@sapuri-agent-plugins" = true;
     "recpedia@sapuri-agent-plugins" = true;
+    "cisco-vpn@sapuri-agent-plugins" = true;
   };
 
   _claude.extraPermissions = [
