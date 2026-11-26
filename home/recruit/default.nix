@@ -2,9 +2,6 @@
 let
   # buildNpmPackage を使わない理由:
   # 頻繁にリリースされる npm パッケージで npmDepsHash 維持コストが高い。
-  m365-cli = pkgs.writeShellScriptBin "m365" ''
-    exec ${pkgs.lib.getExe pkgs.nodejs} ${pkgs.lib.getExe' pkgs.nodejs "npx"} --yes --package @pnp/cli-microsoft365@latest m365 "$@"
-  '';
   deploygate-cli = pkgs.writeShellScriptBin "deploygate" ''
     exec ${pkgs.lib.getExe pkgs.nodejs} ${pkgs.lib.getExe' pkgs.nodejs "npx"} --yes --package deploygate@latest deploygate "$@"
   '';
@@ -29,9 +26,6 @@ in
 
     # PDF
     poppler-utils
-
-    # Microsoft 365
-    m365-cli
 
     # DeployGate
     deploygate-cli
@@ -80,7 +74,6 @@ in
     # sapuri-agent-plugins は社内リポジトリのため recruit / qall-k8s のみで有効化する
     "figma-implementation-core@sapuri-agent-plugins" = true;
     "yutaura-tools@sapuri-agent-plugins" = true;
-    "m365@sapuri-agent-plugins" = true;
     "k12-manage-web-devs@sapuri-agent-plugins" = true;
     "recpedia@sapuri-agent-plugins" = true;
   };
