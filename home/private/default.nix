@@ -38,6 +38,10 @@ in
 
     # ターミナル操作のデモ GIF を .tape スクリプトから生成する。
     vhs
+
+    # Google AI Plus の枠を CLI で使う。Gemini CLI は 2026-06-18 に Google ログインが終了し AI Plus も対象外。
+    # recruit に置かない理由: 個人の Google アカウントで OAuth する前提のため。
+    antigravity-cli
   ]) ++ [
     # Claude Code の hook(PreToolUse/Notification/Stop) から呼ばれ、承認待ちやターン完了を
     # iPhone の Moshi アプリへ通知する Go デーモン。ペアリング token は macOS Keychain に保存される。
