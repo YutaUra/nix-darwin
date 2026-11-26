@@ -62,7 +62,7 @@ home-manager switch --flake .#qall-k8s
 
 **Claude は原則としてビルド（`darwin-rebuild build` / `nix build`）を実行しない。**
 
-このリポジトリは Rust 製ツール（claudia, gws, herdr）を
+このリポジトリは Rust 製ツール（gws, herdr）を
 ソースからビルドするため、build はキャッシュミス時に CPU を数分〜数十分占有し、
 作業中のマシンの体感速度を大きく損なう。
 

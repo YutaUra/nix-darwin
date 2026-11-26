@@ -6,7 +6,7 @@
 # vendorHash を override する手段も無い。
 #
 # flake input にせず rev をここに固定する理由: rev を進めるたび vendorHash の貼り替えが
-# 必要で、`nix flake update` による自動追従では無言で壊れる（claudia と同じ方針）。
+# 必要で、`nix flake update` による自動追従では無言で壊れる。
 #
 # 更新するときは rev・hash・vendorHash を書き換える
 # （hash は lib.fakeHash でビルドし mismatch の `got:` から取得できる）。

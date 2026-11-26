@@ -108,7 +108,7 @@
           inherit system;
           specialArgs = { inherit username configName; };
           modules = [
-            { nixpkgs.overlays = [ (import ./overlays/claude-code.nix) (import ./overlays/gws.nix) (import ./overlays/claudia.nix) (import ./overlays/logq.nix) (_: _: { herdr = inputs.herdr.packages.${system}.default; beads = inputs.beads.packages.${system}.default; github-runner = inputs.nixpkgs-github-runner.legacyPackages.${system}.github-runner; }) ]; }
+            { nixpkgs.overlays = [ (import ./overlays/claude-code.nix) (import ./overlays/gws.nix) (import ./overlays/logq.nix) (_: _: { herdr = inputs.herdr.packages.${system}.default; beads = inputs.beads.packages.${system}.default; github-runner = inputs.nixpkgs-github-runner.legacyPackages.${system}.github-runner; }) ]; }
             ./hosts/${hostname}/default.nix
             retainFlakeInputs
             nix-homebrew.darwinModules.nix-homebrew

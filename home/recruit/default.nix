@@ -38,9 +38,6 @@ in
 
     # ログを SQL で分析する CLI
     logq
-
-    # LiteLLM Proxy + Entra ID SSO 経由の Claude Code ランチャー（社内ツール）
-    claudia
   ];
 
   # herdr に「この pane は claude」と同定させるための kubectl exec ラッパー。
